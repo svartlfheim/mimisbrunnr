@@ -1,0 +1,8 @@
+tls:
+  stores:
+    default: {}
+  certificates:
+    - certFile: /certs/mimisbrunnr.local/cert.pem
+      keyFile: /certs/mimisbrunnr.local/key.pem
+    - certFile: /certs/pgadmin.local/cert.pem
+      keyFile: /certs/pgadmin.local/key.pem
