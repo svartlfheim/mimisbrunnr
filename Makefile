@@ -35,10 +35,11 @@ build-local-images: build-minica-image
 
 .PHONY: gen-certs
 gen-certs:
-	if [ ! -d ./.local/certs/mimisbrunnr.dev ]; then $(DOCKER_RUN_MINICA) --domains mimisbrunnr.dev; fi;
+	if [ ! -d ./.local/certs/mimisbrunnr.local ]; then $(DOCKER_RUN_MINICA) --domains mimisbrunnr.local; fi;
+	if [ ! -d ./.local/certs/pgadmin.local ]; then $(DOCKER_RUN_MINICA) --domains pgadmin.local; fi;
 
 .PHONY: dns
-dns: context ## Configures hosts file with DNS entries; pulls ingress rules from k8s to create them
+dns: ## Configures hosts file with DNS entries; pulls ingress rules from k8s to create them
 	./.local/bin/dns.sh
 
 .PHONY: tls-trust-ca
@@ -54,7 +55,7 @@ install-hosts: ## Installs the hosts cli utility in ./.local/bin
 	rm ./.local/bin/hosts.tar.gz
 
 .PHONY: prepare-local
-prepare-local: install-hosts build-local-images gen-certs
+prepare-local: install-hosts build-local-images gen-certs tls-trust-ca
 
 .PHONY: up
 up: ## Start the docker-compose development environment
@@ -68,10 +69,18 @@ build-images:
 down: ## Destroy the docker-compose development environment
 	$(DOCKER_COMPOSE) down
 
-# Logs
+# API
 .PHONY: api-logs
 api-logs:
 	$(DOCKER_COMPOSE) logs -f api
+
+.PHONY: api-exec
+api-exec:
+	$(DOCKER_COMPOSE) exec api bash
+
+.PHONY: api-restart
+api-restart: ## Restart the ymir container only
+	$(DOCKER_COMPOSE) restart api
 
 # Docs
 .PHONY: gen-openapi-html
