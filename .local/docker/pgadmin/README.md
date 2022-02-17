@@ -12,10 +12,10 @@ For this environment you can run the following commands:
 ```
 # This will put you in the pgadmin container
 $ make exec-pgadmin
-$ /venv/bin/python3 setup.py --dump-servers /tmp/servers.json --user postgres@ymir.local
+$ /venv/bin/python3 setup.py --dump-servers /tmp/servers.json --user postgres@mimisbrunnr.local
 ```
 
-We need to use the same path to the python executable that is used when pgadmin is launched. I found this path by running `ps` on the server and seeing exactly what command was used to start the pgadmin app. Next we use `--dump-servers` option, to dump servers, and the path `/tmp/servers.json` can be anything. The `--user postgres@ymir.local` needs to be the user you were logged in as when you created the database. This email is defined by an env var: PGADMIN_DEFAULT_EMAIL which you can find the value of in the docker-compose file.
+We need to use the same path to the python executable that is used when pgadmin is launched. I found this path by running `ps` on the server and seeing exactly what command was used to start the pgadmin app. Next we use `--dump-servers` option, to dump servers, and the path `/tmp/servers.json` can be anything. The `--user postgres@mimisbrunnr.local` needs to be the user you were logged in as when you created the database. This email is defined by an env var: PGADMIN_DEFAULT_EMAIL which you can find the value of in the docker-compose file.
 
 Once you've created this file, simply cat the file with `$ cat /tmp/servers.json` and paste the resulting json into the servers.json file.
 

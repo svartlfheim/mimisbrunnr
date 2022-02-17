@@ -1,7 +1,7 @@
 {
     "Servers": {
         "1": {
-            "Name": "ymir_db",
+            "Name": "mimisbrunnr_db",
             "Group": "Servers",
             "Host": "postgres",
             "Port": 5432,

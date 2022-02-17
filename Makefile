@@ -1,6 +1,6 @@
 PROJECT_NAME=mmbrnr
 
-DOCKER_COMPOSE=docker compose -f ./.local/docker/docker-compose.yml --project-name="$(PROJECT_NAME)_dev"
+DOCKER_COMPOSE=docker compose -f ./.local/docker/docker-compose.yml --env-file ./.local/docker/.env --project-name="$(PROJECT_NAME)_dev"
 
 IMAGE_MINICA="mmbrnr-minica:local"
 DOCKER_RUN_MINICA=docker run --rm -v "$(shell pwd)/.local/certs:/srv" -w /srv $(IMAGE_MINICA)
@@ -54,8 +54,12 @@ install-hosts: ## Installs the hosts cli utility in ./.local/bin
 	chmod +x ./.local/bin/hosts
 	rm ./.local/bin/hosts.tar.gz
 
+.PHONY: prepare-env
+prepare-env:
+	if [ ! -f ./.local/docker/.env ]; then cp ./.local/docker/.env.example ./.local/docker/.env; fi;
+
 .PHONY: prepare-local
-prepare-local: install-hosts build-local-images gen-certs tls-trust-ca
+prepare-local: prepare-env install-hosts build-local-images gen-certs tls-trust-ca
 
 .PHONY: up
 up: ## Start the docker-compose development environment
@@ -81,6 +85,36 @@ api-exec:
 .PHONY: api-restart
 api-restart: ## Restart the ymir container only
 	$(DOCKER_COMPOSE) restart api
+
+# Postgres
+.PHONY: pg-logs
+pg-logs:
+	$(DOCKER_COMPOSE) logs -f postgres
+
+.PHONY: pg-exec
+pg-exec:
+	$(DOCKER_COMPOSE) exec postgres bash
+
+.PHONY: pg-restart
+pg-restart: ## Restart the ymir container only
+	$(DOCKER_COMPOSE) restart postgres
+
+.PHONY: pg-clean
+pg-clean:
+	rm -rf ./.local/docker/storage/postgres/*
+
+# Pgaadmin
+.PHONY: pgadmin-logs
+pgadmin-logs:
+	$(DOCKER_COMPOSE) logs -f pgadmin
+
+.PHONY: pgadmin-exec
+pgadmin-exec:
+	$(DOCKER_COMPOSE) exec pgadmin sh
+
+.PHONY: pgadmin-restart
+pgadmin-restart: ## Restart the ymir container only
+	$(DOCKER_COMPOSE) restart pgadmin
 
 # Docs
 .PHONY: gen-openapi-html

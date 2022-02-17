@@ -15,6 +15,20 @@ services:
       - ./traefik/traefik-dynamic-config.yaml:/traefik-dynamic-config.yaml
       - ../certs:/certs
 
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_SCHEMA: ${APP_DB_SCHEMA}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
+      MIGRATIONS_DB_USER: ${MIGRATIONS_DB_USER}
+      MIGRATIONS_DB_USER_PASSWORD: ${MIGRATIONS_DB_USER_PASSWORD}
+    volumes: 
+      - ./storage/postgres:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+
   api:
     build:
       context: ./api
@@ -36,10 +50,10 @@ services:
     ports:
       - "8989:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: postgres@ymir.local
-      PGADMIN_DEFAULT_PASSWORD: iampgadmin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_USER}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     volumes:
-      - "../docker/pgadmin/servers.json:/pgadmin4/servers.json"
+      - "./pgadmin/servers.json:/pgadmin4/servers.json"
     labels:
       - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.local`)"
       - "traefik.enable=true"
