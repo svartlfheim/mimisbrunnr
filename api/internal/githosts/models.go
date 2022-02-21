@@ -21,7 +21,7 @@ func AvailableGitHostTypes() []GitHostType {
 
 type Credentials struct {
 	ID uuid.UUID
-	PersonalAccessToken string
+	Token string
 	Active bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -32,7 +32,7 @@ func (c *Credentials) GetID() uuid.UUID {
 }
 
 func (c *Credentials) GetToken() string {
-	return c.PersonalAccessToken
+	return c.Token
 }
 
 func (c *Credentials) IsActive() bool {

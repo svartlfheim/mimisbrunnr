@@ -39,15 +39,7 @@ func (r *AddGitHostV1Response) IsListData() bool {
 	return false
 }
 
-type addGitHostRepository interface {
-	Save(*GitHost) error
-}
-
-type AddGitHostHandler struct {
-	repo addGitHostRepository
-}
-
-func (h *AddGitHostHandler) Add(dto AddGitHostDTO) (result.Result) {
+func (m *Manager) Add(dto AddGitHostDTO) (result.Result) {
 	return &AddGitHostV1Response{
 		Created: nil,
 		errors: []error{

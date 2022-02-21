@@ -3,17 +3,24 @@ package cmdregistry
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/rs/zerolog"
+	"github.com/svartlfheim/mimisbrunnr/internal/config"
 )
 
-type CommandHandler interface{
-	GetName() string
-	GetHelp() string
-	Handle() error
+type env interface {
+	GetLogger() zerolog.Logger
 }
 
+type CommandHandler interface {
+	GetName() string
+	GetHelp() string
+	Handle(cfg *config.AppConfig, args []string) error
+}
 
 type Registry struct {
 	commands []CommandHandler
+	logger zerolog.Logger
 }
 
 func (r *Registry) Register(h CommandHandler) error {
@@ -32,7 +39,7 @@ func (r *Registry) Register(h CommandHandler) error {
 			break
 		}
 
-		return &ErrCommandAlreadyRegistered{
+		return ErrCommandAlreadyRegistered{
 			Command: attemptedName,
 			AttemptedType: attemptedType,
 			RegisteredType: registeredType,
@@ -52,7 +59,7 @@ func (r *Registry) FindHandler(c string) (CommandHandler, error) {
 		}
 	}
 
-	return nil, &ErrCommandNotFound{
+	return nil, ErrCommandNotFound{
 		Command: c,
 	}
 }
@@ -72,6 +79,8 @@ func (r *Registry) GetHelp(err error) string {
 	return msg
 }
 
-func NewRegistry() *Registry {
-	return &Registry{}
+func NewRegistry(l zerolog.Logger) *Registry {
+	return &Registry{
+		logger: l,
+	}
 }

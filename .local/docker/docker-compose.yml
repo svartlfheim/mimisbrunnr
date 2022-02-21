@@ -33,8 +33,16 @@ services:
     build:
       context: ./api
     working_dir: /go/src/app-dev
-    #environment:
-      #HTTP_PORT: 8080
+    environment:
+      MIMISBRUNNR_RDB_DRIVER: ${APP_DB_DRIVER}
+      MIMISBRUNNR_RDB_HOST: ${APP_DB_HOST}
+      MIMISBRUNNR_RDB_PORT: ${APP_DB_PORT}
+      MIMISBRUNNR_RDB_USERNAME: ${APP_DB_USER}
+      MIMISBRUNNR_RDB_PASSWORD: ${APP_DB_USER_PASSWORD}
+      MIMISBRUNNR_RDB_SCHEMA: ${APP_DB_SCHEMA}
+      MIMISBRUNNR_RDB_DATABASE: ${APP_DB_DATABASE}
+      MIMISBRUNNR_RDB_MIGRATIONS_USERNAME: ${MIGRATIONS_DB_USER}
+      MIMISBRUNNR_RDB_MIGRATIONS_PASSWORD: ${MIGRATIONS_DB_USER_PASSWORD}
     volumes:
       - ../../api:/go/src/app-dev
     labels:

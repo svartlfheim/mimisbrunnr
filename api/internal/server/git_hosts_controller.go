@@ -3,11 +3,22 @@ package server
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog"
+	"github.com/svartlfheim/mimisbrunnr/internal/githosts"
+	"github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 )
 
-type GitHostsController struct {}
+type gitHostsManager interface {
+	Add(dto githosts.AddGitHostDTO) (result.Result)
+}
+
+type GitHostsController struct {
+	logger zerolog.Logger
+	manager gitHostsManager
+}
 
 func gitHostContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +60,15 @@ func (c *GitHostsController) Search(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *GitHostsController) Create(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("create git host"))
+	res := c.manager.Add(githosts.AddGitHostDTO{})
+	msgs := []string{}
+	
+	for _, err := range(res.Errors()) {
+		msgs = append(msgs, err.Error())
+	}
+
+	w.WriteHeader(res.Status().ToHTTP())
+	w.Write([]byte(strings.Join(msgs, "\n")))
 }
 
 func (c *GitHostsController) Get(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +83,9 @@ func (c *GitHostsController) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("delete git host: " + r.Context().Value("gitHostID").(string)))
 }
 
-func NewGitHostsController() *GitHostsController {
-	return &GitHostsController{}
+func NewGitHostsController(l zerolog.Logger, m gitHostsManager) *GitHostsController {
+	return &GitHostsController{
+		logger: l,
+		manager: m,
+	}
 }

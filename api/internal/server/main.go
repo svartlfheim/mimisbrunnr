@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/zerolog"
 )
 
 type Controller interface {
@@ -20,7 +21,7 @@ type serverConfig interface {
 }
 
 type Server struct {
-	config serverConfig
+	logger zerolog.Logger
 	controllers []Controller
 }
 
@@ -64,25 +65,20 @@ func (s *Server) buildRouter() http.Handler {
 	return r
 }
 
-func (s *Server) Handle() error {
+func (s *Server) Start(c serverConfig) error {
+	// Don't need it outside here yet...
 	r := s.buildRouter()
 
-	listenOn := fmt.Sprintf("%s:%s", s.config.GetListenHost(), s.config.GetHTTPPort())
+	listenOn := fmt.Sprintf("%s:%s", c.GetListenHost(), c.GetHTTPPort())
+
+	s.logger.Info().Str("port", c.GetHTTPPort()).Str("host", c.GetListenHost()).Msg("Starting HTTP server")
 
 	return http.ListenAndServe(listenOn, r)
 }
 
-func (s *Server) GetName() string {
-	return "serve"
-}
-
-func (s *Server) GetHelp() string {
-	return "help for serve"
-}
-
-func NewServer(c serverConfig, controllers []Controller) *Server {
+func NewServer(logger zerolog.Logger, controllers []Controller) *Server {
 	return &Server{
-		config: c,
+		logger: logger,
 		controllers: controllers,
 	}
 }

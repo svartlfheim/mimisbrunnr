@@ -1,0 +1,16 @@
+http:
+  port: 8080
+  listen_host: 0.0.0.0
+
+rdb:
+  driver: postgres
+  host: postgres
+  port: 5432
+  username: see-docker-compose-env
+  password: see-docker-compose-env
+  schema: see-docker-compose-env
+  database: see-docker-compose-env
+
+  migrations:
+    username: see-docker-compose-env
+    password: see-docker-compose-env
