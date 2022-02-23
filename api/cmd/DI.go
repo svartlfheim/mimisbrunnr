@@ -11,14 +11,27 @@ import (
 )
 
 type DIContainer struct {
+	// config.*
 	Cfg *config.AppConfig
+
+	// cmdregistry.*
 	RootCmdRegistry *cmdregistry.Registry
+
+	// rdbconn.*
 	RdbConnManager *rdbconn.ConnectionManager
+
+	// scm.*
 	PostgresSCMIntegrationsRepository *scm.PostgresRepository
+	SCMIntegrationsManager *scm.Manager
+
+	// server.*
 	Server *server.Server
 	SCMIntegrationsController *server.SCMIntegrationsController
 	ProjectsController *server.ProjectsController
-	SCMIntegrationsManager *scm.Manager
+	ErrorHandlingJsonUnmarshaller *server.ErrorHandlingJsonUnmarshaller
+
+
+	// External dependencies
 	Logger zerolog.Logger
 	Fs afero.Fs
 }
@@ -82,11 +95,20 @@ func (di *DIContainer) GetSCMIntegrationsManager() *scm.Manager {
 	return di.SCMIntegrationsManager
 }
 
+func (di *DIContainer) GetErrorHandlingJsonUnmarshaller() *server.ErrorHandlingJsonUnmarshaller {
+	if di.ErrorHandlingJsonUnmarshaller == nil {
+		di.ErrorHandlingJsonUnmarshaller = server.NewErrorHandlingJsonUnmarshaller()
+	}
+
+	return di.ErrorHandlingJsonUnmarshaller
+}
+
 func (di *DIContainer) GetSCMIntegrationsController() *server.SCMIntegrationsController {
 	if di.SCMIntegrationsController == nil {
 		di.SCMIntegrationsController = server.NewSCMIntegrationsController(
 			di.Logger,
 			di.GetSCMIntegrationsManager(),
+			di.GetErrorHandlingJsonUnmarshaller(),
 		)
 	}
 

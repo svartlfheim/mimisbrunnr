@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"strings"
 
@@ -11,6 +12,10 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 )
 
+type jsonUnmarshaller interface {
+	Unmarshal(contents io.Reader, into interface{}) error
+}
+
 type SCMIntegrationsManager interface {
 	Add(dto scm.AddSCMIntegrationDTO) (result.Result)
 }
@@ -18,6 +23,7 @@ type SCMIntegrationsManager interface {
 type SCMIntegrationsController struct {
 	logger zerolog.Logger
 	manager SCMIntegrationsManager
+	jsonUnmarshaller jsonUnmarshaller
 }
 
 func SCMIntegrationContext(next http.Handler) http.Handler {
@@ -60,7 +66,13 @@ func (c *SCMIntegrationsController) Search(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *SCMIntegrationsController) Create(w http.ResponseWriter, r *http.Request) {
-	res := c.manager.Add(scm.AddSCMIntegrationDTO{})
+	dto := scm.AddSCMIntegrationDTO{}
+	
+
+	if err := c.jsonUnmarshaller.Unmarshal(r.Body, &dto); handleError(w, c.logger, err) {
+		return
+	}
+	res := c.manager.Add(dto)
 	msgs := []string{}
 	
 	for _, err := range(res.Errors()) {
@@ -83,9 +95,10 @@ func (c *SCMIntegrationsController) Delete(w http.ResponseWriter, r *http.Reques
 	w.Write([]byte("delete scm integration: " + r.Context().Value("SCMIntegrationID").(string)))
 }
 
-func NewSCMIntegrationsController(l zerolog.Logger, m SCMIntegrationsManager) *SCMIntegrationsController {
+func NewSCMIntegrationsController(l zerolog.Logger, m SCMIntegrationsManager, jU jsonUnmarshaller) *SCMIntegrationsController {
 	return &SCMIntegrationsController{
 		logger: l,
 		manager: m,
+		jsonUnmarshaller: jU,
 	}
 }

@@ -9,10 +9,6 @@ type connManager interface {
 	GetConnection() (*sqlx.DB, error)
 }
 
-type repository interface {
-	Create(*SCMIntegration, *AccessToken) error
-}
-
 func NewPostgresRepository(cm connManager, l zerolog.Logger) *PostgresRepository {
 	return &PostgresRepository{
 		cm: cm,

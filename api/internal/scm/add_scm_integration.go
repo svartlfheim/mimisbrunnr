@@ -6,6 +6,10 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 )
 
+type addSCMIntegrationRepository interface {
+	Create(*SCMIntegration, *AccessToken) error
+}
+
 type AddSCMIntegrationDTO struct {
 	Name string `json:"name"`
 	Type SCMIntegrationType `json:"type"`
@@ -39,7 +43,7 @@ func (r *AddSCMIntegrationV1Response) IsListData() bool {
 	return false
 }
 
-func (m *Manager) Add(dto AddSCMIntegrationDTO) (result.Result) {
+func handleAddSCMIntegration(repo addSCMIntegrationRepository, dto AddSCMIntegrationDTO) result.Result {
 	return &AddSCMIntegrationV1Response{
 		Created: nil,
 		errors: []error{
@@ -48,3 +52,4 @@ func (m *Manager) Add(dto AddSCMIntegrationDTO) (result.Result) {
 		status: result.InternalError,
 	}
 }
+
