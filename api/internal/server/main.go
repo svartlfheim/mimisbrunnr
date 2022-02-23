@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog"
 	"github.com/rs/zerolog"
 )
 
@@ -43,14 +44,16 @@ func apiContext(next http.Handler) http.Handler {
 
 func (s *Server) buildRouter() http.Handler {
 	r := chi.NewRouter()
-
+	logger := httplog.NewLogger("server", httplog.Options{
+		JSON: true,
+	})
+	r.Use(httplog.RequestLogger(logger))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.GetHead)
 	r.Use(middleware.Timeout(60 * time.Second))
-  
+
 	r.Route("/api/v{apiVersion:[0-9]+}", func(r chi.Router) {
 		r.Use(apiContext)
 
