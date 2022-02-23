@@ -15,7 +15,7 @@ func handleError(w http.ResponseWriter, l zerolog.Logger, err error) bool {
 	message := "An unknown error occurred!"
 
 	switch err.(type) {
-	case ErrBadRequestInputData:
+	case ErrBadRequestInputData, ErrEmptyRequestBodyNotAllowed:
 		statusCode = 400
 		message = err.Error()
 		l.Warn().Err(err).Int("status-code", statusCode).Msg("bad request data received")

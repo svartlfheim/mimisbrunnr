@@ -29,3 +29,9 @@ type ErrStructFieldNotFoundForJsonFieldName struct {
 func (e ErrStructFieldNotFoundForJsonFieldName) Error() string {
 	return fmt.Sprintf("no field in struct %s has tag 'json:\"%s\"'", e.StructType.Name(), e.JSONField)
 }
+
+type ErrEmptyRequestBodyNotAllowed struct {}
+
+func (e ErrEmptyRequestBodyNotAllowed) Error() string {
+	return "request body cannot be empty"
+}

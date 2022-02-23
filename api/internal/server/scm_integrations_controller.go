@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -13,7 +12,7 @@ import (
 )
 
 type jsonUnmarshaller interface {
-	Unmarshal(contents io.Reader, into interface{}) error
+	Unmarshal(r *http.Request, into interface{}) error
 }
 
 type SCMIntegrationsManager interface {
@@ -69,7 +68,7 @@ func (c *SCMIntegrationsController) Create(w http.ResponseWriter, r *http.Reques
 	dto := scm.AddSCMIntegrationV1DTO{}
 	
 
-	if err := c.jsonUnmarshaller.Unmarshal(r.Body, &dto); handleError(w, c.logger, err) {
+	if err := c.jsonUnmarshaller.Unmarshal(r, &dto); handleError(w, c.logger, err) {
 		return
 	}
 	res := c.manager.AddV1(dto)

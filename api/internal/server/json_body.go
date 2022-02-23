@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"net/http"
 	"reflect"
 )
 
@@ -46,7 +46,11 @@ func (m *ErrorHandlingJsonUnmarshaller) buildUnmarshalTypeError(s interface{}, e
 	}
 }
 
-func (m *ErrorHandlingJsonUnmarshaller) Unmarshal(contents io.Reader, into interface{}) error {
+func (m *ErrorHandlingJsonUnmarshaller) Unmarshal(r *http.Request, into interface{}) error {
+	if r.ContentLength == 0 {
+		return ErrEmptyRequestBodyNotAllowed{}
+	}
+
 	rval := reflect.ValueOf(into)
 
 	if rval.Kind() != reflect.Ptr {
@@ -55,7 +59,7 @@ func (m *ErrorHandlingJsonUnmarshaller) Unmarshal(contents io.Reader, into inter
 		}
 	}
 
-	err := json.NewDecoder(contents).Decode(into)
+	err := json.NewDecoder(r.Body).Decode(into)
 
 	if typeErr, ok := err.(*json.UnmarshalTypeError); ok {
 		return m.buildUnmarshalTypeError(into, typeErr)
