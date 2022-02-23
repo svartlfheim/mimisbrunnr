@@ -1,4 +1,4 @@
-package githosts
+package scm
 
 import (
 	"github.com/rs/zerolog"

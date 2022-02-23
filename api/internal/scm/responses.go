@@ -1,4 +1,4 @@
-package githosts
+package scm
 
 type ResponseStatus string
 

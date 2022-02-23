@@ -1,4 +1,4 @@
-package githosts
+package scm
 
 import (
 	"github.com/jmoiron/sqlx"
@@ -10,7 +10,7 @@ type connManager interface {
 }
 
 type repository interface {
-	Create(*GitHost, *Credentials) error
+	Create(*SCMIntegration, *AccessToken) error
 }
 
 func NewPostgresRepository(cm connManager, l zerolog.Logger) *PostgresRepository {

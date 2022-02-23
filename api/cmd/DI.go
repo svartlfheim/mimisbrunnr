@@ -5,8 +5,8 @@ import (
 	"github.com/spf13/afero"
 	"github.com/svartlfheim/mimisbrunnr/internal/cmdregistry"
 	"github.com/svartlfheim/mimisbrunnr/internal/config"
-	"github.com/svartlfheim/mimisbrunnr/internal/githosts"
 	"github.com/svartlfheim/mimisbrunnr/internal/rdbconn"
+	"github.com/svartlfheim/mimisbrunnr/internal/scm"
 	"github.com/svartlfheim/mimisbrunnr/internal/server"
 )
 
@@ -14,11 +14,11 @@ type DIContainer struct {
 	Cfg *config.AppConfig
 	RootCmdRegistry *cmdregistry.Registry
 	RdbConnManager *rdbconn.ConnectionManager
-	PostgresGitHostsRepository *githosts.PostgresRepository
+	PostgresSCMIntegrationsRepository *scm.PostgresRepository
 	Server *server.Server
-	GitHostsController *server.GitHostsController
+	SCMIntegrationsController *server.SCMIntegrationsController
 	ProjectsController *server.ProjectsController
-	GitHostsManager *githosts.Manager
+	SCMIntegrationsManager *scm.Manager
 	Logger zerolog.Logger
 	Fs afero.Fs
 }
@@ -61,36 +61,36 @@ func (di *DIContainer) GetRDBConnManager() *rdbconn.ConnectionManager {
 	return di.RdbConnManager
 }
 
-func (di *DIContainer) GetPostgresGitHostsRepository() *githosts.PostgresRepository {
-	if di.PostgresGitHostsRepository == nil {
+func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *scm.PostgresRepository {
+	if di.PostgresSCMIntegrationsRepository == nil {
 		connManager := di.GetRDBConnManager()
 
-		di.PostgresGitHostsRepository = githosts.NewPostgresRepository(connManager, di.Logger)
+		di.PostgresSCMIntegrationsRepository = scm.NewPostgresRepository(connManager, di.Logger)
 	}
 
-	return di.PostgresGitHostsRepository
+	return di.PostgresSCMIntegrationsRepository
 }
 
-func (di *DIContainer) GetGitHostsManager() *githosts.Manager {
-	if di.GitHostsManager == nil {
-		di.GitHostsManager = githosts.NewManager(
+func (di *DIContainer) GetSCMIntegrationsManager() *scm.Manager {
+	if di.SCMIntegrationsManager == nil {
+		di.SCMIntegrationsManager = scm.NewManager(
 			di.Logger,
-			di.GetPostgresGitHostsRepository(),
+			di.GetPostgresSCMIntegrationsRepository(),
 		)
 	}
 
-	return di.GitHostsManager
+	return di.SCMIntegrationsManager
 }
 
-func (di *DIContainer) GetGitHostsController() *server.GitHostsController {
-	if di.GitHostsController == nil {
-		di.GitHostsController = server.NewGitHostsController(
+func (di *DIContainer) GetSCMIntegrationsController() *server.SCMIntegrationsController {
+	if di.SCMIntegrationsController == nil {
+		di.SCMIntegrationsController = server.NewSCMIntegrationsController(
 			di.Logger,
-			di.GetGitHostsManager(),
+			di.GetSCMIntegrationsManager(),
 		)
 	}
 
-	return di.GitHostsController
+	return di.SCMIntegrationsController
 }
 
 func (di *DIContainer) GetProjectsController() *server.ProjectsController {
@@ -106,7 +106,7 @@ func (di *DIContainer) GetServer() *server.Server {
 		s := server.NewServer(
 			di.Logger,
 			[]server.Controller{
-				di.GetGitHostsController(),
+				di.GetSCMIntegrationsController(),
 				di.GetProjectsController(),
 			},
 		)
