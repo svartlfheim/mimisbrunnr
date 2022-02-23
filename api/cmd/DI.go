@@ -8,6 +8,7 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/internal/rdbconn"
 	"github.com/svartlfheim/mimisbrunnr/internal/scm"
 	"github.com/svartlfheim/mimisbrunnr/internal/server"
+	"github.com/svartlfheim/mimisbrunnr/internal/validation"
 )
 
 type DIContainer struct {
@@ -30,6 +31,8 @@ type DIContainer struct {
 	ProjectsController *server.ProjectsController
 	ErrorHandlingJsonUnmarshaller *server.ErrorHandlingJsonUnmarshaller
 
+	// validation.*
+	Validator *validation.Validator
 
 	// External dependencies
 	Logger zerolog.Logger
@@ -89,6 +92,7 @@ func (di *DIContainer) GetSCMIntegrationsManager() *scm.Manager {
 		di.SCMIntegrationsManager = scm.NewManager(
 			di.Logger,
 			di.GetPostgresSCMIntegrationsRepository(),
+			di.GetValidator(),
 		)
 	}
 
@@ -138,6 +142,15 @@ func (di *DIContainer) GetServer() *server.Server {
 
 	return di.Server
 }
+
+func (di *DIContainer) GetValidator() *validation.Validator {
+	if di.Validator == nil {
+		di.Validator = validation.NewValidator(di.Logger)
+	}
+
+	return di.Validator
+}
+
 
 func NewDIContainer(l zerolog.Logger, fs afero.Fs, cfg *config.AppConfig) *DIContainer {
 	return &DIContainer{

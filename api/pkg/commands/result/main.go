@@ -1,5 +1,7 @@
 package result
 
+import "github.com/svartlfheim/mimisbrunnr/internal/validation"
+
 type Status string
 
 func (rs Status) Equals(other Status) bool {
@@ -29,6 +31,7 @@ type Result interface {
 	Data() interface {}
 	Meta() interface {}
 	Errors() []error
+	ValidationErrors() []validation.ValidationError
 	Status() Status
 	IsListData() bool
 }

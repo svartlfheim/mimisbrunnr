@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -17,7 +17,7 @@ type jsonUnmarshaller interface {
 }
 
 type SCMIntegrationsManager interface {
-	Add(dto scm.AddSCMIntegrationDTO) (result.Result)
+	AddV1(dto scm.AddSCMIntegrationV1DTO) (result.Result)
 }
 
 type SCMIntegrationsController struct {
@@ -66,21 +66,30 @@ func (c *SCMIntegrationsController) Search(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *SCMIntegrationsController) Create(w http.ResponseWriter, r *http.Request) {
-	dto := scm.AddSCMIntegrationDTO{}
+	dto := scm.AddSCMIntegrationV1DTO{}
 	
 
 	if err := c.jsonUnmarshaller.Unmarshal(r.Body, &dto); handleError(w, c.logger, err) {
 		return
 	}
-	res := c.manager.Add(dto)
-	msgs := []string{}
-	
-	for _, err := range(res.Errors()) {
-		msgs = append(msgs, err.Error())
-	}
+	res := c.manager.AddV1(dto)
 
 	w.WriteHeader(res.Status().ToHTTP())
-	w.Write([]byte(strings.Join(msgs, "\n")))
+
+	if len(res.ValidationErrors()) > 0 {
+		resp, err := json.Marshal(buildInvalidResponseBody(res))
+
+		if err != nil {
+			handleError(w, c.logger, err)
+			return
+		}
+
+		w.Write(resp)
+		return 
+	}
+
+
+	w.Write([]byte("success"))
 }
 
 func (c *SCMIntegrationsController) Get(w http.ResponseWriter, r *http.Request) {
