@@ -76,7 +76,7 @@ func (c *SCMIntegrationsController) Create(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(res.Status().ToHTTP())
 
-	if len(res.ValidationErrors()) > 0 {
+	if res.Status().Equals(result.Invalid) {
 		resp, err := json.Marshal(buildInvalidResponseBody(res))
 
 		if err != nil {

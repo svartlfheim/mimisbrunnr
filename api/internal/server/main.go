@@ -42,11 +42,22 @@ func apiContext(next http.Handler) http.Handler {
 	})
 }
 
+func jsonResponse(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+
+		next.ServeHTTP(w, r)
+	})
+	
+}
+
 func (s *Server) buildRouter() http.Handler {
 	r := chi.NewRouter()
 	logger := httplog.NewLogger("server", httplog.Options{
 		JSON: true,
 	})
+	r.Use(middleware.AllowContentType("application/json"))
+	r.Use(jsonResponse)
 	r.Use(httplog.RequestLogger(logger))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
