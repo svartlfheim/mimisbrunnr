@@ -73,18 +73,34 @@ build-images:
 down: ## Destroy the docker-compose development environment
 	$(DOCKER_COMPOSE) down
 
-# API
-.PHONY: api-logs
-api-logs:
-	$(DOCKER_COMPOSE) logs -f api
+# Backend
+.PHONY: be-logs
+be-logs:
+	$(DOCKER_COMPOSE) logs -f backend
 
-.PHONY: api-exec
-api-exec:
-	$(DOCKER_COMPOSE) exec api bash
+.PHONY: be-exec
+be-exec:
+	$(DOCKER_COMPOSE) exec backend bash
 
-.PHONY: api-restart
-api-restart: ## Restart the ymir container only
-	$(DOCKER_COMPOSE) restart api
+.PHONY: be-restart
+be-restart: ## Restart the ymir container only
+	$(DOCKER_COMPOSE) restart backend
+
+.PHONY: be-fmt
+be-fmt:
+	$(DOCKER_COMPOSE) exec backend make fmt
+
+.PHONY: be-lint
+be-lint:
+	$(DOCKER_COMPOSE) exec backend make lint
+
+.PHONY: be-unit-test
+be-unit-test:
+	$(DOCKER_COMPOSE) exec backend make unit-test
+
+.PHONY: be-ci
+be-ci:
+	$(DOCKER_COMPOSE) exec backend make fmt lint unit-test
 
 # Postgres
 .PHONY: pg-logs
@@ -117,7 +133,7 @@ pgadmin-restart: ## Restart the ymir container only
 	$(DOCKER_COMPOSE) restart pgadmin
 
 # Docs
-.PHONY: gen-openapi-html
-gen-openapi-html:
-	docker run -it -v "$$(pwd):/srv" openapitools/openapi-generator-cli generate -g html -i /srv/.docs/openapi.yaml -o /srv/.docs/openapi.html 
+.PHONY: gen-openbe-html
+gen-openbe-html:
+	docker run -it -v "$$(pwd):/srv" openbetools/openbe-generator-cli generate -g html -i /srv/.docs/openbe.yaml -o /srv/.docs/openbe.html 
 

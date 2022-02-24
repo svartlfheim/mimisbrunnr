@@ -29,9 +29,9 @@ services:
       - ./storage/postgres:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
 
-  api:
+  backend:
     build:
-      context: ./api
+      context: ./backend
     working_dir: /go/src/app-dev
     environment:
       MIMISBRUNNR_RDB_DRIVER: ${APP_DB_DRIVER}
@@ -44,13 +44,13 @@ services:
       MIMISBRUNNR_RDB_MIGRATIONS_USERNAME: ${MIGRATIONS_DB_USER}
       MIMISBRUNNR_RDB_MIGRATIONS_PASSWORD: ${MIGRATIONS_DB_USER_PASSWORD}
     volumes:
-      - ../../api:/go/src/app-dev
+      - ../../backend:/go/src/app-dev
     labels:
-      - "traefik.http.routers.api.rule=Host(`mimisbrunnr.local`)"
+      - "traefik.http.routers.backend.rule=Host(`mimisbrunnr.local`)"
       - "traefik.enable=true"
-      - "traefik.http.routers.api.entrypoints=web"
-      - "traefik.http.services.api.loadbalancer.server.port=8080"
-      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+      - "traefik.http.routers.backend.tls=true"
 
   pgadmin:
     image: dpage/pgadmin4
