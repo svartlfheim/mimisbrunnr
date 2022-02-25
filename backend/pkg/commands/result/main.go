@@ -1,6 +1,10 @@
 package result
 
-import "github.com/svartlfheim/mimisbrunnr/internal/validation"
+import (
+	"net/http"
+
+	"github.com/svartlfheim/mimisbrunnr/internal/validation"
+)
 
 type Status string
 
@@ -11,15 +15,15 @@ func (rs Status) Equals(other Status) bool {
 func (rs Status) ToHTTP() int {
 	switch rs {
 	case Created:
-		return 201
+		return http.StatusCreated
 	case InternalError:
-		return 500
+		return http.StatusInternalServerError
 	case Invalid:
-		return 422
+		return http.StatusUnprocessableEntity
 	}
 
 	// Not implemented as default??
-	return 501
+	return http.StatusNotImplemented
 }
 
 const Created Status = "created"

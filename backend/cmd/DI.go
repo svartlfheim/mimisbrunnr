@@ -43,7 +43,7 @@ func (di *DIContainer) GetRootCommandRegistry() *cmdregistry.Registry {
 	if di.RootCmdRegistry == nil {
 		r := cmdregistry.NewRegistry(di.Logger)
 
-		if err := r.Register(NewServeHandler(di)); err != nil {
+		if err := r.Register(NewServeHandler(di.GetServer())); err != nil {
 			di.Logger.Fatal().Err(err).Msg("failed to register serve handler")
 		}
 

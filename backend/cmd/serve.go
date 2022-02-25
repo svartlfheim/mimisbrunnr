@@ -5,8 +5,12 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/internal/server"
 )
 
+type _server interface {
+	Start(cfg server.ServerConfig) error
+}
+
 type ServeHandler struct {
-	Server *server.Server
+	Server _server
 }
 
 func (s *ServeHandler) Handle(cfg *config.AppConfig, args []string) error {
@@ -21,8 +25,8 @@ func (s *ServeHandler) GetHelp() string {
 	return "help for serve"
 }
 
-func NewServeHandler(di *DIContainer) *ServeHandler {
+func NewServeHandler(srv _server) *ServeHandler {
 	return &ServeHandler{
-		Server: di.GetServer(),
+		Server: srv,
 	}
 }

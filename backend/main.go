@@ -20,16 +20,6 @@ func buildFS() afero.Fs {
 	return afero.NewOsFs()
 }
 
-// func buildRegistry(l zerolog.Logger) *cmdregistry.Registry {
-// 	r := cmdregistry.NewRegistry(l)
-
-// 	if err := r.Register(cmd.NewServeHandler(l)); err != nil {
-// 		l.Fatal().Err(err).Msg("failed to register serve handler")
-// 	}
-
-// 	return r
-// }
-
 func showHelp(r *cmdregistry.Registry, err error) {
 	flag.Usage()
 	fmt.Println("")

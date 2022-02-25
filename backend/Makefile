@@ -1,5 +1,8 @@
 PROJECT_NAME=mmbrnr
 
+MOCKS_DIR=./test/mocks
+MOCKS_GEN_ARGS=--case underscore --keeptree --all --exported
+
 ifndef FILE_GLOB
 	FILE_GLOB=./...
 endif
@@ -21,6 +24,12 @@ fmt:
 lint:
 	golangci-lint run ./...
 
+.PHONY: gen-mocks
+gen-mocks:
+	mokcery $(MOCKS_GEN_ARGS)
+	
+
 .PHONY: unit-test
 unit-test: 
-	go test -cover -count=1 $(FILE_GLOB)
+	go test -cover -coverprofile test/coverage.out -count=1 $(FILE_GLOB)
+	go tool cover -o=test/coverage.html -html=test/coverage.out

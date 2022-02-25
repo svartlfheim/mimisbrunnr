@@ -17,7 +17,7 @@ type Controller interface {
 	Routes() http.Handler
 	RouteGroup() string
 }
-type serverConfig interface {
+type ServerConfig interface {
 	GetHTTPPort() string
 	GetListenHost() string
 }
@@ -97,7 +97,7 @@ func (s *Server) buildRouter() http.Handler {
 	return r
 }
 
-func (s *Server) Start(c serverConfig) error {
+func (s *Server) Start(c ServerConfig) error {
 	// Don't need it outside here yet...
 	r := s.buildRouter()
 
