@@ -6,8 +6,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const appName string = "mimisbrunnr"
-
 type App interface {
 	GetHTTPPort() string
 	GetListenHost() string
@@ -24,17 +22,17 @@ type App interface {
 	GetRDBMigrationsPassword() string
 }
 
-type httpConfig struct {
+type HTTPConfig struct {
 	Port       string `yaml:"port"`
 	ListenHost string `yaml:"listen_host" split_words:"true"`
 }
 
-type rdbMigrationsConfig struct {
+type RDBMigrationsConfig struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 }
 
-type rdbConfig struct {
+type RDBConfig struct {
 	Driver     string              `yaml:"driver"`
 	Host       string              `yaml:"host"`
 	Port       string              `yaml:"port"`
@@ -42,12 +40,12 @@ type rdbConfig struct {
 	Password   string              `yaml:"password"`
 	Schema     string              `yaml:"schema"`
 	Database   string              `yaml:"database"`
-	Migrations rdbMigrationsConfig `yaml:"migrations"`
+	Migrations RDBMigrationsConfig `yaml:"migrations"`
 }
 
 type AppConfig struct {
-	HTTP httpConfig `yaml:"http"`
-	RDB  rdbConfig  `yaml:"rdb"`
+	HTTP HTTPConfig `yaml:"http"`
+	RDB  RDBConfig  `yaml:"rdb"`
 }
 
 func (c *AppConfig) GetHTTPPort() string {
@@ -140,7 +138,7 @@ func unmarshalConfigToStruct(path string, fs afero.Fs, cfg *AppConfig) error {
 	return nil
 }
 
-func processEnvVars(cfg *AppConfig) error {
+func processEnvVars(appName string, cfg *AppConfig) error {
 	if err := envconfig.Process(appName, cfg); err != nil {
 		return ErrCouldNotProcessEnv{
 			Message: err.Error(),
@@ -150,13 +148,13 @@ func processEnvVars(cfg *AppConfig) error {
 	return nil
 }
 
-func Load(path string, fs afero.Fs) (*AppConfig, error) {
+func Load(path string, fs afero.Fs, appName string) (*AppConfig, error) {
 	cfg := &AppConfig{
-		HTTP: httpConfig{
+		HTTP: HTTPConfig{
 			Port:       "8080",
 			ListenHost: "0.0.0.0",
 		},
-		RDB: rdbConfig{
+		RDB: RDBConfig{
 			Driver: "postgres",
 			Host:   "localhost",
 			Port:   "5432",
@@ -171,7 +169,7 @@ func Load(path string, fs afero.Fs) (*AppConfig, error) {
 		return cfg, err
 	}
 
-	if err := processEnvVars(cfg); err != nil {
+	if err := processEnvVars(appName, cfg); err != nil {
 		return cfg, err
 	}
 

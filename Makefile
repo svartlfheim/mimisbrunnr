@@ -119,6 +119,20 @@ pg-restart: ## Restart the ymir container only
 pg-clean:
 	rm -rf ./.local/docker/storage/postgres/*
 
+
+# Postgres
+.PHONY: pgtest-logs
+pgtest-logs:
+	$(DOCKER_COMPOSE) logs -f testpostgres
+
+.PHONY: pgtest-exec
+pgtest-exec:
+	$(DOCKER_COMPOSE) exec testpostgres bash
+
+.PHONY: pgtest-restart
+pgtest-restart: ## Restart the ymir container only
+	$(DOCKER_COMPOSE) restart testpostgres
+
 # Pgaadmin
 .PHONY: pgadmin-logs
 pgadmin-logs:

@@ -1,2 +1,8 @@
-coverage.out
-coverage.html
+unit.out
+unit.html
+
+integration.out
+integration.html
+
+full_suite.out
+full_suite.html

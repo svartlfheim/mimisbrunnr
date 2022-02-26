@@ -12,6 +12,8 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/internal/config"
 )
 
+const appName string = "mimisbrunnr"
+
 func buildLogger() zerolog.Logger {
 	return zerolog.New(os.Stderr).With().Timestamp().Logger().Level(zerolog.DebugLevel)
 }
@@ -34,7 +36,9 @@ func main() {
 	cfgPath := flag.String("f", "./mimisbrunnr.yaml", "Path to a YAML config file to load.")
 	flag.Parse()
 
-	cfg, err := config.Load(*cfgPath, fs)
+	cfg, err := config.Load(*cfgPath, fs, appName)
+
+	logger = logger.Level(zerolog.Level(*logLevel))
 
 	dic := cmd.NewDIContainer(logger, fs, cfg)
 
@@ -42,8 +46,6 @@ func main() {
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to load config")
 	}
-
-	logger = logger.Level(zerolog.Level(*logLevel))
 
 	allArgs := flag.Args()
 

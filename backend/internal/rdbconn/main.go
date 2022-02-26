@@ -4,11 +4,32 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 )
 
+type connectionOpener interface {
+	ForPostgres(u string, pass string, db string, h string, port string, s string) (*sqlx.DB, error)
+}
+
+type ConnectionOpener struct{}
+
+func (c *ConnectionOpener) ForPostgres(u string, pass string, db string, h string, port string, s string) (*sqlx.DB, error) {
+	connString := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s search_path=%s sslmode=disable",
+		u,
+		pass,
+		db,
+		h,
+		port,
+		s,
+	)
+
+	return sqlx.Connect("postgres", connString)
+}
+
 type ConnectionManager struct {
 	logger           zerolog.Logger
+	opener           connectionOpener
 	activeConnection *sqlx.DB
 
 	retries int
@@ -29,7 +50,7 @@ func (cm *ConnectionManager) openNewConnection() (*sqlx.DB, error) {
 		}
 	}
 
-	connString := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s search_path=%s sslmode=disable",
+	return cm.opener.ForPostgres(
 		cm.username,
 		cm.password,
 		cm.database,
@@ -37,8 +58,6 @@ func (cm *ConnectionManager) openNewConnection() (*sqlx.DB, error) {
 		cm.port,
 		cm.schema,
 	)
-
-	return sqlx.Connect("postgres", connString)
 }
 
 func (cm *ConnectionManager) IsPostgres() bool {
@@ -46,10 +65,14 @@ func (cm *ConnectionManager) IsPostgres() bool {
 }
 
 func (cm *ConnectionManager) GetConnection() (*sqlx.DB, error) {
-	err := cm.activeConnection.Ping()
+	var err error
 
-	if err == nil {
-		return cm.activeConnection, nil
+	if cm.activeConnection != nil {
+		err = cm.activeConnection.Ping()
+
+		if err == nil {
+			return cm.activeConnection, nil
+		}
 	}
 
 	for i := 0; i < cm.retries; i++ {
@@ -58,13 +81,19 @@ func (cm *ConnectionManager) GetConnection() (*sqlx.DB, error) {
 
 		db, err := cm.openNewConnection()
 
+		// fmt.Printf("\n\nopen err: %#v\n\n", err)
 		if err != nil {
+			if _, ok := err.(ErrUnsupportedDriver); ok {
+				return nil, err
+			}
+
 			cm.logger.Warn().Err(err).Int("attempt", attemptNumber).Msg("connection attempt failed")
 			continue
 		}
 
 		err = db.Ping()
 
+		// fmt.Printf("\n\n%#v\n\n", err)
 		if err != nil {
 			cm.logger.Warn().Err(err).Int("attempt", attemptNumber).Msg("ping attempt failed")
 			continue
@@ -171,9 +200,10 @@ func WithRetries(retries int) WithParam {
 	}
 }
 
-func NewConnectionManager(l zerolog.Logger, opts ...WithParam) (*ConnectionManager, error) {
+func NewConnectionManager(l zerolog.Logger, o connectionOpener, opts ...WithParam) (*ConnectionManager, error) {
 	cm := &ConnectionManager{
 		logger:  l,
+		opener:  o,
 		retries: 3,
 	}
 
@@ -182,4 +212,8 @@ func NewConnectionManager(l zerolog.Logger, opts ...WithParam) (*ConnectionManag
 	}
 
 	return cm, cm.validateState()
+}
+
+func NewConnectionOpener() *ConnectionOpener {
+	return &ConnectionOpener{}
 }

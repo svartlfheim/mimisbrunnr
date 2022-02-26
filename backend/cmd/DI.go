@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/afero"
 	"github.com/svartlfheim/mimisbrunnr/internal/cmdregistry"
@@ -20,6 +22,7 @@ type DIContainer struct {
 
 	// rdbconn.*
 	RdbConnManager *rdbconn.ConnectionManager
+	RdbConnOpener  *rdbconn.ConnectionOpener
 
 	// scm.*
 	PostgresSCMIntegrationsRepository *scm.PostgresRepository
@@ -44,7 +47,7 @@ func (di *DIContainer) GetRootCommandRegistry() *cmdregistry.Registry {
 		r := cmdregistry.NewRegistry(di.Logger)
 
 		if err := r.Register(NewServeHandler(di.GetServer())); err != nil {
-			di.Logger.Fatal().Err(err).Msg("failed to register serve handler")
+			di.Logger.Panic().Err(err).Msg("failed to register serve handler")
 		}
 
 		di.RootCmdRegistry = r
@@ -53,10 +56,21 @@ func (di *DIContainer) GetRootCommandRegistry() *cmdregistry.Registry {
 	return di.RootCmdRegistry
 }
 
+func (di *DIContainer) GetRDBConnOpener() *rdbconn.ConnectionOpener {
+	if di.RdbConnOpener == nil {
+		o := rdbconn.NewConnectionOpener()
+
+		di.RdbConnOpener = o
+	}
+
+	return di.RdbConnOpener
+}
+
 func (di *DIContainer) GetRDBConnManager() *rdbconn.ConnectionManager {
 	if di.RdbConnManager == nil {
 		built, err := rdbconn.NewConnectionManager(
 			di.Logger,
+			di.GetRDBConnOpener(),
 			rdbconn.WithDriver(di.Cfg.GetRDBDriver()),
 			rdbconn.WithHost(di.Cfg.GetRDBHost()),
 			rdbconn.WithPort(di.Cfg.GetRDBPort()),
@@ -67,7 +81,7 @@ func (di *DIContainer) GetRDBConnManager() *rdbconn.ConnectionManager {
 		)
 
 		if err != nil {
-			di.Logger.Fatal().Err(err).Msg("failed to build RDB connection manager")
+			di.Logger.Panic().Err(err).Msg(fmt.Sprintf("failed to build RDB connection manager: %s", err.Error()))
 		}
 
 		di.RdbConnManager = built
