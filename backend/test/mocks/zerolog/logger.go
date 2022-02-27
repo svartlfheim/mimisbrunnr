@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"testing"
 
 	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/assert"
 )
 
 type Zerologger struct {
@@ -48,6 +50,10 @@ func (zl *Zerologger) ExtractLogsToMap(filters ...filterOpt) (m []map[string]int
 	}
 
 	return
+}
+
+func (zl *Zerologger) AssertLogs(t *testing.T, logs []map[string]interface{}, filters ...filterOpt) {
+	assert.Equal(t, logs, zl.ExtractLogsToMap(filters...))
 }
 
 func NewLogger() *Zerologger {

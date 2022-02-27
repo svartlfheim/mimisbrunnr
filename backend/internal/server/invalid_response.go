@@ -5,7 +5,7 @@ import "github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 type fieldError struct {
 	Path       string                 `json:"path"`
 	Message    string                 `json:"message"`
-	Parameters map[string]interface{} `json:"params"`
+	Parameters map[string]string `json:"params"`
 	Rule       string                 `json:"rule"`
 }
 

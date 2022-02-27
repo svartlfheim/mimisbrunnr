@@ -4,12 +4,13 @@ import (
 	"errors"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	"github.com/svartlfheim/mimisbrunnr/internal/validation"
 	"github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 )
 
 type addSCMIntegrationRepository interface {
-	Create(*SCMIntegration, *AccessToken) error
+	Create(*models.SCMIntegration, *models.SCMAccessToken) error
 }
 
 type AddSCMIntegrationV1AccessToken struct {
@@ -25,7 +26,7 @@ type AddSCMIntegrationV1DTO struct {
 }
 
 type AddSCMIntegrationV1Response struct {
-	created          *SCMIntegration
+	created          *models.SCMIntegration
 	errors           []error
 	status           result.Status
 	validationErrors []validation.ValidationError

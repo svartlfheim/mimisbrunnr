@@ -1,4 +1,4 @@
-package scm
+package models
 
 import (
 	"time"
@@ -20,7 +20,7 @@ func AvailableSCMIntegrationTypes() []SCMIntegrationType {
 	return availableSCMIntegrationTypes
 }
 
-type AccessToken struct {
+type SCMAccessToken struct {
 	ID        uuid.UUID
 	Name      string
 	Token     string
@@ -29,27 +29,27 @@ type AccessToken struct {
 	UpdatedAt time.Time
 }
 
-func (c *AccessToken) GetID() uuid.UUID {
+func (c *SCMAccessToken) GetID() uuid.UUID {
 	return c.ID
 }
 
-func (c *AccessToken) GetName() string {
+func (c *SCMAccessToken) GetName() string {
 	return c.Name
 }
 
-func (c *AccessToken) GetToken() string {
+func (c *SCMAccessToken) GetToken() string {
 	return c.Token
 }
 
-func (c *AccessToken) IsActive() bool {
+func (c *SCMAccessToken) IsActive() bool {
 	return c.Active
 }
 
-func (c *AccessToken) GetCreationTime() time.Time {
+func (c *SCMAccessToken) GetCreationTime() time.Time {
 	return c.CreatedAt
 }
 
-func (c *AccessToken) GetLastUpdatedTime() time.Time {
+func (c *SCMAccessToken) GetLastUpdatedTime() time.Time {
 	return c.UpdatedAt
 }
 
@@ -58,7 +58,7 @@ type SCMIntegration struct {
 	Name         string
 	Type         SCMIntegrationType
 	Endpoint     string
-	AccessTokens []*AccessToken
+	AccessTokens []*SCMAccessToken
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -79,11 +79,11 @@ func (gh *SCMIntegration) GetEndpoint() string {
 	return gh.Endpoint
 }
 
-func (gh *SCMIntegration) GetCredentials() []*AccessToken {
+func (gh *SCMIntegration) GetCredentials() []*SCMAccessToken {
 	return gh.AccessTokens
 }
 
-func (gh *SCMIntegration) GetActiveCredentials() *AccessToken {
+func (gh *SCMIntegration) GetActiveCredentials() *SCMAccessToken {
 	for _, c := range gh.AccessTokens {
 		if c.IsActive() {
 			return c

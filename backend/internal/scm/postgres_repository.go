@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
+	"github.com/svartlfheim/mimisbrunnr/internal/models"
 )
 
 const postgresSCMIntegrationsTableName string = "scm_integrations"
@@ -35,7 +36,7 @@ type PostgresRepository struct {
 	cm     connManager
 }
 
-func (r *PostgresRepository) toPostgresSCMIntegration(gh *SCMIntegration) *postgresSCMIntegration {
+func (r *PostgresRepository) toPostgresSCMIntegration(gh *models.SCMIntegration) *postgresSCMIntegration {
 	return &postgresSCMIntegration{
 		ID:        gh.GetID().String(),
 		Name:      gh.GetName(),
@@ -46,7 +47,7 @@ func (r *PostgresRepository) toPostgresSCMIntegration(gh *SCMIntegration) *postg
 	}
 }
 
-func (r *PostgresRepository) toPostgresSCMIntegrationAccessToken(token *AccessToken, gh *SCMIntegration) *postgresSCMIntegrationAccessToken {
+func (r *PostgresRepository) toPostgresSCMIntegrationAccessToken(token *models.SCMAccessToken, gh *models.SCMIntegration) *postgresSCMIntegrationAccessToken {
 	return &postgresSCMIntegrationAccessToken{
 		ID:               token.GetID().String(),
 		Name:             token.GetName(),
@@ -58,7 +59,7 @@ func (r *PostgresRepository) toPostgresSCMIntegrationAccessToken(token *AccessTo
 	}
 }
 
-func (r *PostgresRepository) doCreateSCMIntegrationAccessToken(tx *sqlx.Tx, creds *AccessToken, gh *SCMIntegration) error {
+func (r *PostgresRepository) doCreateSCMIntegrationAccessToken(tx *sqlx.Tx, creds *models.SCMAccessToken, gh *models.SCMIntegration) error {
 	dbGhC := r.toPostgresSCMIntegrationAccessToken(creds, gh)
 
 	insert := fmt.Sprintf(`
@@ -73,7 +74,7 @@ VALUES
 	return err
 }
 
-func (r *PostgresRepository) Create(gh *SCMIntegration, cred *AccessToken) error {
+func (r *PostgresRepository) Create(gh *models.SCMIntegration, cred *models.SCMAccessToken) error {
 	conn, err := r.cm.GetConnection()
 
 	if err != nil {

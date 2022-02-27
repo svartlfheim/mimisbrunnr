@@ -11,69 +11,6 @@ import (
 
 type WithValidationExtension func(*validator.Validate) *validator.Validate
 
-type ValidationError interface {
-	Path() string
-	Message() string
-	Rule() string
-	Parameters() map[string]interface{}
-	ValueType() reflect.Type
-}
-
-type validationError struct {
-	path      string
-	rule      string
-	param     string
-	valueType reflect.Type
-}
-
-func (ve validationError) Path() string {
-	return ve.path
-}
-
-func (ve validationError) Message() string {
-	switch ve.Rule() {
-	case "required":
-		return "is required"
-	case "gt":
-		switch ve.ValueType().Name() {
-		case "string":
-			return fmt.Sprintf("must contain more than %s characters", ve.param)
-		case "int":
-			return fmt.Sprintf("must be larger than %s", ve.param)
-		default:
-			return "not large enough"
-		}
-	default:
-		return "is invalid"
-	}
-}
-
-func (ve validationError) Rule() string {
-	return ve.rule
-}
-
-func (ve validationError) Parameters() map[string]interface{} {
-	if ve.param == "" {
-		return map[string]interface{}{}
-	}
-
-	switch ve.Rule() {
-	case "gt", "lt":
-		return map[string]interface{}{
-			"limit": ve.param,
-		}
-
-	default:
-		return map[string]interface{}{
-			"param": ve.param,
-		}
-	}
-}
-
-func (ve validationError) ValueType() reflect.Type {
-	return ve.valueType
-}
-
 type Validator struct {
 	logger zerolog.Logger
 }
@@ -84,11 +21,13 @@ func (v *Validator) make() *validator.Validate {
 	// register function to get tag name from json tags.
 	// See: https://github.com/go-playground/validator/blob/master/_examples/struct-level/main.go
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-		if name == "-" {
-			return ""
+		jsonName := fld.Tag.Get("json")
+
+		if (jsonName == "") {
+			v.logger.Warn().Str("field", fld.Name).Msg("field in struct for validation does not have a json tag")
 		}
-		return name
+
+		return jsonName
 	})
 
 	return validate
@@ -105,11 +44,22 @@ func (v *Validator) transformErrors(s interface{}, errs validator.ValidationErro
 
 	validationErrors := []ValidationError{}
 	for _, fieldErr := range errs {
+
+		var valueType string = "unknown"
+		
+		errval := reflect.ValueOf(fieldErr.Value())
+
+		if errval.Kind() == reflect.Ptr && errval.IsNil() {
+			valueType = "nil"
+		} else {
+			valueType = errval.Type().Name()
+		}
+
 		validationErrors = append(validationErrors, validationError{
 			path:      strings.TrimPrefix(fieldErr.Namespace(), fmt.Sprintf("%s.", structName)),
 			rule:      fieldErr.ActualTag(),
 			param:     fieldErr.Param(),
-			valueType: fieldErr.Type(),
+			valueType: valueType,
 		})
 	}
 
