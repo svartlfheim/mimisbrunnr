@@ -53,6 +53,17 @@ func (c *SCMAccessToken) GetLastUpdatedTime() time.Time {
 	return c.UpdatedAt
 }
 
+func NewSCMAccessToken(id uuid.UUID, name string, token string, active bool, createdAt time.Time, updatedAt time.Time) (*SCMAccessToken) {
+	return &SCMAccessToken{
+		ID: id,
+		Name: name,
+		Token: token,
+		Active: active,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+	}
+}
+
 type SCMIntegration struct {
 	ID           uuid.UUID
 	Name         string
@@ -63,28 +74,28 @@ type SCMIntegration struct {
 	UpdatedAt    time.Time
 }
 
-func (gh *SCMIntegration) GetID() uuid.UUID {
-	return gh.ID
+func (si *SCMIntegration) GetID() uuid.UUID {
+	return si.ID
 }
 
-func (gh *SCMIntegration) GetName() string {
-	return gh.Name
+func (si *SCMIntegration) GetName() string {
+	return si.Name
 }
 
-func (gh *SCMIntegration) GetType() SCMIntegrationType {
-	return gh.Type
+func (si *SCMIntegration) GetType() SCMIntegrationType {
+	return si.Type
 }
 
-func (gh *SCMIntegration) GetEndpoint() string {
-	return gh.Endpoint
+func (si *SCMIntegration) GetEndpoint() string {
+	return si.Endpoint
 }
 
-func (gh *SCMIntegration) GetCredentials() []*SCMAccessToken {
-	return gh.AccessTokens
+func (si *SCMIntegration) GetAccessTokens() []*SCMAccessToken {
+	return si.AccessTokens
 }
 
-func (gh *SCMIntegration) GetActiveCredentials() *SCMAccessToken {
-	for _, c := range gh.AccessTokens {
+func (si *SCMIntegration) GetActiveAccessToken() *SCMAccessToken {
+	for _, c := range si.AccessTokens {
 		if c.IsActive() {
 			return c
 		}
@@ -93,10 +104,22 @@ func (gh *SCMIntegration) GetActiveCredentials() *SCMAccessToken {
 	return nil
 }
 
-func (gh *SCMIntegration) GetCreationTime() time.Time {
-	return gh.CreatedAt
+func (si *SCMIntegration) GetCreationTime() time.Time {
+	return si.CreatedAt
 }
 
-func (gh *SCMIntegration) GetLastUpdatedTime() time.Time {
-	return gh.UpdatedAt
+func (si *SCMIntegration) GetLastUpdatedTime() time.Time {
+	return si.UpdatedAt
+}
+
+func NewSCMIntegration(id uuid.UUID, name string, t SCMIntegrationType, endpoint string, accessTokens []*SCMAccessToken, createdAt time.Time, updatedAt time.Time) (*SCMIntegration) {
+	return &SCMIntegration{
+		ID: id,
+		Name: name,
+		Type: t,
+		Endpoint: endpoint,
+		AccessTokens: accessTokens,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+	}
 }
