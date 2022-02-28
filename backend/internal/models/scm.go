@@ -53,12 +53,12 @@ func (c *SCMAccessToken) GetLastUpdatedTime() time.Time {
 	return c.UpdatedAt
 }
 
-func NewSCMAccessToken(id uuid.UUID, name string, token string, active bool, createdAt time.Time, updatedAt time.Time) (*SCMAccessToken) {
+func NewSCMAccessToken(id uuid.UUID, name string, token string, active bool, createdAt time.Time, updatedAt time.Time) *SCMAccessToken {
 	return &SCMAccessToken{
-		ID: id,
-		Name: name,
-		Token: token,
-		Active: active,
+		ID:        id,
+		Name:      name,
+		Token:     token,
+		Active:    active,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 	}
@@ -112,14 +112,14 @@ func (si *SCMIntegration) GetLastUpdatedTime() time.Time {
 	return si.UpdatedAt
 }
 
-func NewSCMIntegration(id uuid.UUID, name string, t SCMIntegrationType, endpoint string, accessTokens []*SCMAccessToken, createdAt time.Time, updatedAt time.Time) (*SCMIntegration) {
+func NewSCMIntegration(id uuid.UUID, name string, t SCMIntegrationType, endpoint string, accessTokens []*SCMAccessToken, createdAt time.Time, updatedAt time.Time) *SCMIntegration {
 	return &SCMIntegration{
-		ID: id,
-		Name: name,
-		Type: t,
-		Endpoint: endpoint,
+		ID:           id,
+		Name:         name,
+		Type:         t,
+		Endpoint:     endpoint,
 		AccessTokens: accessTokens,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		CreatedAt:    createdAt,
+		UpdatedAt:    updatedAt,
 	}
 }

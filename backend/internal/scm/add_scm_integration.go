@@ -14,15 +14,15 @@ type addSCMIntegrationRepository interface {
 }
 
 type AddSCMIntegrationV1AccessToken struct {
-	Name  string `json:"name" validate:"required"`
-	Token string `json:"token" validate:"required"`
+	Name  *string `json:"name" validate:"required,gt=0"`
+	Token *string `json:"token" validate:"required,gt=0"`
 }
 
 type AddSCMIntegrationV1DTO struct {
-	Name        string                         `json:"name" validate:"required"`
-	Type        string                         `json:"type" validate:"required"`
-	Endpoint    string                         `json:"endpoint" validate:"required,gt=10"`
-	AccessToken AddSCMIntegrationV1AccessToken `json:"access_token" validate:"required"`
+	Name        *string                        `json:"name" validate:"required,gt=0"`
+	Type        *string                        `json:"type" validate:"required,gt=0"`
+	Endpoint    *string                        `json:"endpoint" validate:"required,gt=0"`
+	AccessToken AddSCMIntegrationV1AccessToken `json:"access_token" validate:"required,gt=0"`
 }
 
 type AddSCMIntegrationV1Response struct {
@@ -33,7 +33,7 @@ type AddSCMIntegrationV1Response struct {
 }
 
 func (r *AddSCMIntegrationV1Response) Data() interface{} {
-	return *r.created
+	return r.created
 }
 
 func (r *AddSCMIntegrationV1Response) Meta() interface{} {

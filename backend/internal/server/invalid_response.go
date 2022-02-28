@@ -3,10 +3,10 @@ package server
 import "github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 
 type fieldError struct {
-	Path       string                 `json:"path"`
-	Message    string                 `json:"message"`
+	Path       string            `json:"path"`
+	Message    string            `json:"message"`
 	Parameters map[string]string `json:"params"`
-	Rule       string                 `json:"rule"`
+	Rule       string            `json:"rule"`
 }
 
 type invalidDataResponse struct {

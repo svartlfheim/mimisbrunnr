@@ -23,7 +23,7 @@ func (v *Validator) make() *validator.Validate {
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		jsonName := fld.Tag.Get("json")
 
-		if (jsonName == "") {
+		if jsonName == "" {
 			v.logger.Warn().Str("field", fld.Name).Msg("field in struct for validation does not have a json tag")
 		}
 
@@ -45,8 +45,8 @@ func (v *Validator) transformErrors(s interface{}, errs validator.ValidationErro
 	validationErrors := []ValidationError{}
 	for _, fieldErr := range errs {
 
-		var valueType string = "unknown"
-		
+		var valueType string
+
 		errval := reflect.ValueOf(fieldErr.Value())
 
 		if errval.Kind() == reflect.Ptr && errval.IsNil() {

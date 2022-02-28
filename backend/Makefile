@@ -37,8 +37,12 @@ gen-cmd-mocks:
 gen-internal-rdbconn-mocks: 
 	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/rdbconn --outpkg rdbconnmocks --dir ./internal/rdbconn --name connectionOpener
 
+.PHONY: gen-internal-validation-mocks
+gen-internal-validation-mocks: 
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/validation --outpkg validationmocks --dir ./internal/validation --name ValidationError
+
 .PHONY: gen-mocks
-gen-mocks: gen-cmd-mocks gen-internal-rdbconn-mocks
+gen-mocks: gen-cmd-mocks gen-internal-rdbconn-mocks gen-internal-validation-mocks
 
 .PHONY: unit-test
 unit-test: 

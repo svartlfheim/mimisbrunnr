@@ -12,6 +12,7 @@ type ValidationError interface {
 }
 
 type Rule string
+
 const requiredRule Rule = "required"
 const greaterThanRule Rule = "gt"
 const lessThanRule Rule = "lt"
@@ -28,13 +29,13 @@ var messagesForRule map[Rule]messageGenerator = map[Rule]messageGenerator{
 
 		switch ve.valueType {
 		case "string":
-			if ! found {
+			if !found {
 				return "must contain more characters"
 			}
 
 			return fmt.Sprintf("must contain more than %s characters", limit)
 		case "int":
-			if ! found {
+			if !found {
 				return "must be a larger number"
 			}
 
@@ -46,12 +47,12 @@ var messagesForRule map[Rule]messageGenerator = map[Rule]messageGenerator{
 }
 
 var parameterParsers map[Rule]parameterParser = map[Rule]parameterParser{
-	greaterThanRule: func (ve validationError) map[string]string {
+	greaterThanRule: func(ve validationError) map[string]string {
 		return map[string]string{
 			"limit": ve.param,
 		}
 	},
-	lessThanRule: func (ve validationError) map[string]string {
+	lessThanRule: func(ve validationError) map[string]string {
 		return map[string]string{
 			"limit": ve.param,
 		}
