@@ -12,6 +12,7 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/internal/rdbconn"
 	"github.com/svartlfheim/mimisbrunnr/internal/schema"
 	"github.com/svartlfheim/mimisbrunnr/internal/scm"
+	scmpostgres "github.com/svartlfheim/mimisbrunnr/internal/scm/postgres"
 	"github.com/svartlfheim/mimisbrunnr/internal/server"
 	"github.com/svartlfheim/mimisbrunnr/internal/validation"
 )
@@ -25,7 +26,7 @@ type DIContainer struct {
 	RdbConnOpener               *rdbconn.ConnectionOpener
 
 	// scm.*
-	PostgresSCMIntegrationsRepository *scm.PostgresRepository
+	PostgresSCMIntegrationsRepository *scmpostgres.Repository
 	SCMIntegrationsManager            *scm.Manager
 
 	// schema.*
@@ -47,7 +48,7 @@ type DIContainer struct {
 
 type commandHandler func(args []string) error
 
-func (di *DIContainer) loadConfig(h commandHandler) func(*cobra.Command, []string) error {
+func (di *DIContainer) commandWrap(h commandHandler) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		cfgPath, err := cmd.Flags().GetString("config")
 
@@ -61,7 +62,7 @@ func (di *DIContainer) loadConfig(h commandHandler) func(*cobra.Command, []strin
 			return err
 		}
 
-		if logLevel, err := cmd.Flags().GetInt("log-level"); err != nil {
+		if logLevel, err := cmd.Flags().GetInt("log-level"); err == nil {
 			di.Logger = di.Logger.Level(zerolog.Level(logLevel))
 		}
 
@@ -78,21 +79,21 @@ func (di *DIContainer) GetCommands() []*cobra.Command {
 	migrate.AddCommand(&cobra.Command{
 		Use:   "up",
 		Short: "Create/update schema",
-		RunE: di.loadConfig(func(args []string) error {
+		RunE: di.commandWrap(func(args []string) error {
 			return handleMigrationsUp(di.GetMigrator(), di.Cfg, args)
 		}),
 	})
 	migrate.AddCommand(&cobra.Command{
 		Use:   "down",
 		Short: "Rollback db schema",
-		RunE: di.loadConfig(func(args []string) error {
+		RunE: di.commandWrap(func(args []string) error {
 			return handleMigrationsDown(di.GetMigrator(), di.Cfg, args)
 		}),
 	})
 	migrate.AddCommand(&cobra.Command{
 		Use:   "list",
 		Short: "List the migrations",
-		RunE: di.loadConfig(func(args []string) error {
+		RunE: di.commandWrap(func(args []string) error {
 			return handleMigrationsList(di.GetMigrator(), di.Cfg, args)
 		}),
 	})
@@ -101,7 +102,7 @@ func (di *DIContainer) GetCommands() []*cobra.Command {
 		{
 			Use:   "serve",
 			Short: "Start the HTTP server",
-			RunE: di.loadConfig(func(args []string) error {
+			RunE: di.commandWrap(func(args []string) error {
 				return handleServe(di.GetServer(), di.Cfg, args)
 			}),
 		},
@@ -185,7 +186,7 @@ func (di *DIContainer) GetRDBConnManagerForMigrations() *rdbconn.ConnectionManag
 	return di.RdbConnManagerForMigrations
 }
 
-func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *scm.PostgresRepository {
+func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *scmpostgres.Repository {
 	if di.PostgresSCMIntegrationsRepository == nil {
 		connManager := di.GetRDBConnManager()
 

@@ -7,6 +7,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/svartlfheim/mimisbrunnr/test/integration"
 	rdbconnmocks "github.com/svartlfheim/mimisbrunnr/test/mocks/rdbconn"
 	zerologmocks "github.com/svartlfheim/mimisbrunnr/test/mocks/zerolog"
@@ -249,46 +250,21 @@ func Test_ConnectionManager_GetConnection(t *testing.T) {
 
 func TestIntegration_connectionOpener_ForPostgres(t *testing.T) {
 	integration.SkipIfIntegrationTestsNotConfigured(t)
-	var found bool
-	var u, pass, db, host, port, schema string
 
-	if u, found = integration.Getenv("RDB_USERNAME"); !found {
-		t.Errorf("expected env var to be present: RDB_USERNAME")
-		t.FailNow()
-	}
-
-	if pass, found = integration.Getenv("RDB_PASSWORD"); !found {
-		t.Errorf("expected env var to be present: RDB_PASSWORD")
-		t.FailNow()
-	}
-
-	if db, found = integration.Getenv("RDB_DATABASE"); !found {
-		t.Errorf("expected env var to be present: RDB_DATABASE")
-		t.FailNow()
-	}
-
-	if host, found = integration.Getenv("RDB_HOST"); !found {
-		t.Errorf("expected env var to be present: RDB_HOST")
-		t.FailNow()
-	}
-
-	if port, found = integration.Getenv("RDB_PORT"); !found {
-		t.Errorf("expected env var to be present: RDB_PORT")
-		t.FailNow()
-	}
-
-	if schema, found = integration.Getenv("RDB_SCHEMA"); !found {
-		t.Errorf("expected env var to be present: RDB_SCHEMA")
-		t.FailNow()
-	}
+	u := integration.GetenvOrFail(t, "RDB_USERNAME");
+	pass := integration.GetenvOrFail(t, "RDB_PASSWORD");
+	db := integration.GetenvOrFail(t, "RDB_DATABASE");
+	host := integration.GetenvOrFail(t, "RDB_HOST");
+	port := integration.GetenvOrFail(t, "RDB_PORT");
+	schema := integration.GetenvOrFail(t, "RDB_SCHEMA"); 
 
 	opener := NewConnectionOpener()
 	conn, err := opener.ForPostgres(u, pass, db, host, port, schema)
+	require.Nil(t, err)
 
 	defer func() {
 		//nolint:errcheck
 		conn.Close()
 	}()
 
-	assert.Nil(t, err)
 }

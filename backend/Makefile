@@ -32,6 +32,18 @@ lint:
 gen-cmd-mocks: 
 	mockery $(MOCKS_GEN_ARGS) --output $(MOCKS_DIR)/cmd --outpkg cmdmocks --dir ./cmd
 
+.PHONY: gen-internal-schema-mocks
+gen-internal-schema-mocks: 
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/schema --outpkg schema --dir ./internal/schema --name connectionManager
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/schema --outpkg schema --dir ./internal/schema --name hasSchema
+
+.PHONY: gen-scm-postgres-mocks
+gen-scm-postgres-mocks: 
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/scm/postgres --outpkg scmpostgresmocks --dir ./internal/scm/postgres --name connManager
+
+.PHONY: gen-scm-mocks
+gen-scm-mocks: gen-scm-postgres-mocks
+
 .PHONY: gen-internal-rdbconn-mocks
 gen-internal-rdbconn-mocks: 
 	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/rdbconn --outpkg rdbconnmocks --dir ./internal/rdbconn --name connectionOpener
@@ -41,22 +53,20 @@ gen-internal-validation-mocks:
 	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/validation --outpkg validationmocks --dir ./internal/validation --name ValidationError
 
 .PHONY: gen-mocks
-gen-mocks: gen-cmd-mocks gen-internal-rdbconn-mocks gen-internal-validation-mocks
+gen-mocks: gen-cmd-mocks gen-internal-rdbconn-mocks gen-internal-validation-mocks gen-internal-schema-mocks gen-scm-mocks
 
 .PHONY: unit-test
 unit-test: 
-	go test -cover -coverprofile test/unit.out -count=1 $(TEST_ARGS) $(FILE_GLOB)
+	go test -cover -coverprofile test/unit.out $(TEST_ARGS) $(FILE_GLOB)
 	go tool cover -o=test/unit.html -html=test/unit.out
 
 .PHONY: integration-test
 integration-test:
-	CI_INTEGRATION_TESTS_ENABLED=true go test -cover -coverprofile test/integration.out -count=1 -run "^TestIntegration" $(TEST_ARGS) $(FILE_GLOB)
+	CI_INTEGRATION_TESTS_ENABLED=true go test -cover -coverprofile test/integration.out -p 1 -run "^TestIntegration" $(TEST_ARGS) $(FILE_GLOB)
 	go tool cover -o=test/integration.html -html=test/integration.out
 
 .PHONY: test
-test:
-	CI_INTEGRATION_TESTS_ENABLED=true go test -cover -coverprofile test/full_suite.out -count=1 $(TEST_ARGS) $(FILE_GLOB)
-	go tool cover -o=test/full_suite.html -html=test/full_suite.out
+test: unit-test integration-test
 
 .PHONY: ci
 ci: fmt lint test

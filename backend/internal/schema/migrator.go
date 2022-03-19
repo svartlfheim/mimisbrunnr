@@ -6,8 +6,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
 	"github.com/svartlfheim/gomigrator"
-	"github.com/svartlfheim/mimisbrunnr/internal/rdbconn"
 )
+
+type connectionManager interface {
+	GetConnection() (*sqlx.DB, error)
+}
 
 var postgresMigrations gomigrator.MigrationList = gomigrator.NewMigrationList(
 	[]gomigrator.Migration{
@@ -15,7 +18,8 @@ var postgresMigrations gomigrator.MigrationList = gomigrator.NewMigrationList(
 			Id:   "create-scm_integrations-table",
 			Name: "create scm_integrations table",
 			Execute: func(tx *sqlx.Tx) (sql.Result, error) {
-				createTable := `CREATE TABLE scm_integrations(
+				createTable := `
+CREATE TABLE scm_integrations(
 	id uuid NOT NULL,
 	name TEXT NOT NULL,
 	type TEXT NOT NULL,
@@ -25,13 +29,44 @@ var postgresMigrations gomigrator.MigrationList = gomigrator.NewMigrationList(
 	PRIMARY KEY(id),
 	UNIQUE(name)
 );
-CREATE INDEX idx_name ON scm_integrations(name);
-CREATE INDEX idx_type ON scm_integrations(type);`
+CREATE INDEX idx_scm_integrations_name ON scm_integrations(name);
+CREATE INDEX idx_scm_integrations_type ON scm_integrations(type);`
 
 				return tx.Exec(createTable)
 			},
 			Rollback: func(tx *sqlx.Tx) (sql.Result, error) {
 				dropTable := `DROP TABLE scm_integrations;`
+
+				return tx.Exec(dropTable)
+			},
+		},
+
+		{
+			Id:   "create-scm_integrations_access_tokens-table",
+			Name: "create scm_integrations_access_tokens table",
+			Execute: func(tx *sqlx.Tx) (sql.Result, error) {
+				createTable := `
+CREATE TABLE scm_integrations_access_tokens(
+	id uuid NOT NULL,
+	name TEXT NOT NULL,
+	token TEXT NOT NULL,
+	active BOOLEAN,
+	integration_id uuid NOT NULL,
+	created_at TIMESTAMP WITHOUT TIME ZONE,
+	updated_at TIMESTAMP WITHOUT TIME ZONE,
+	PRIMARY KEY(id),
+	UNIQUE(name, integration_id),
+	CONSTRAINT fk_scm_integrations_access_tokens_to_scm_integrations FOREIGN KEY(integration_id) REFERENCES scm_integrations(id)
+);
+
+CREATE INDEX idx_scm_integrations_access_tokens_name ON scm_integrations_access_tokens(name);
+CREATE INDEX idx_scm_integrations_access_tokens_active ON scm_integrations_access_tokens(active);
+CREATE INDEX idx_scm_integrations_access_tokens_integration_id ON scm_integrations_access_tokens(integration_id);`
+
+				return tx.Exec(createTable)
+			},
+			Rollback: func(tx *sqlx.Tx) (sql.Result, error) {
+				dropTable := `DROP TABLE scm_integrations_access_tokens;`
 
 				return tx.Exec(dropTable)
 			},
@@ -43,7 +78,7 @@ type hasSchema interface {
 	GetRDBSchema() string
 }
 
-func NewMigrator(cm *rdbconn.ConnectionManager, cfg hasSchema, l zerolog.Logger) (*gomigrator.Migrator, error) {
+func NewMigrator(cm connectionManager, cfg hasSchema, l zerolog.Logger) (*gomigrator.Migrator, error) {
 	conn, err := cm.GetConnection()
 
 	if err != nil {
@@ -52,6 +87,6 @@ func NewMigrator(cm *rdbconn.ConnectionManager, cfg hasSchema, l zerolog.Logger)
 
 	return gomigrator.NewMigrator(conn, postgresMigrations, gomigrator.Opts{
 		Schema:  cfg.GetRDBSchema(),
-		Applyer: "some-name-for-noew",
+		Applyer: "some-name-for-now",
 	}, l)
 }
