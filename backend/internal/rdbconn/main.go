@@ -77,7 +77,11 @@ func (cm *ConnectionManager) GetConnection() (*sqlx.DB, error) {
 
 	for i := 0; i < cm.retries; i++ {
 		attemptNumber := i + 1
-		cm.logger.Warn().Err(err).Int("attempt", attemptNumber).Msg("database ping failed, reconnecting")
+		if cm.activeConnection != nil {
+			cm.logger.Warn().Err(err).Int("attempt", attemptNumber).Msg("database ping failed, reconnecting")
+		} else {
+			cm.logger.Debug().Int("attempt", attemptNumber).Msg("opening database connection for first time")
+		}
 
 		db, err := cm.openNewConnection()
 
