@@ -15,6 +15,15 @@ services:
       - ./traefik/traefik-dynamic-config.yaml:/traefik-dynamic-config.yaml
       - ../certs:/certs
 
+  create-ssl-cert:
+    profiles:
+      - manual
+    build:
+      context: ./images/minica
+    working_dir: /certs
+    volumes:
+      - "../certs:/certs"
+
   postgres:
     image: postgres:13
     environment:

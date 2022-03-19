@@ -2,8 +2,7 @@ PROJECT_NAME=mmbrnr
 
 DOCKER_COMPOSE=docker compose -f ./.local/docker/docker-compose.yml --env-file ./.local/docker/.env --project-name="$(PROJECT_NAME)_dev"
 
-IMAGE_MINICA="mmbrnr-minica:local"
-DOCKER_RUN_MINICA=docker run --rm -v "$(shell pwd)/.local/certs:/srv" -w /srv $(IMAGE_MINICA)
+TLS_CERTS_DIR=./.local/certs
 
 # This is a combination of the following suggestions:
 # https://gist.github.com/prwhite/8168133#gistcomment-1420062
@@ -21,22 +20,23 @@ help: ## This help dialog.
 			printf "%-30s %s" $$help_command ; \
 			printf '\033[0m'; \
 			printf "%s\n" $$help_info; \
-	done
-
-# --- local images --- #
-.PHONY: build-minica-image
-build-minica-image:
-	docker build --target=final -t $(IMAGE_MINICA) ./.local/docker/images/minica
-
-.PHONY: build-local-images
-build-local-images: build-minica-image
+	done; \
+	echo ""; \
+	echo "The above targets can be used by running: make {target}"; \
+	echo ""; \
+	echo "A '%' symbol in the target represents a wildcard."; \
+	echo "The help dialogue tells you the expected type of value expected."; \
+	echo ""; \
+	echo "{service} - is the name of any service in the docker compose environment"; \
+	echo "            You can list them using: make ps"; \
+	echo "            e.g. make ssh-traefik - will enter you into a shell session in traefik container"; \
 
 # --- local dev --- #
 
 .PHONY: gen-certs
 gen-certs:
-	if [ ! -d ./.local/certs/mimisbrunnr.local ]; then $(DOCKER_RUN_MINICA) --domains mimisbrunnr.local; fi;
-	if [ ! -d ./.local/certs/pgadmin.local ]; then $(DOCKER_RUN_MINICA) --domains pgadmin.local; fi;
+	@if [ ! -d $(TLS_CERTS_DIR)/mimisbrunnr.local ]; then $(DOCKER_COMPOSE) run --rm create-ssl-cert --domains mimisbrunnr.local; fi;
+	@if [ ! -d $(TLS_CERTS_DIR)/pgadmin.local ]; then $(DOCKER_COMPOSE) run --rm create-ssl-cert --domains pgadmin.local; fi;
 
 .PHONY: dns
 dns: ## Configures hosts file with DNS entries; pulls ingress rules from k8s to create them
@@ -59,7 +59,7 @@ prepare-env:
 	if [ ! -f ./.local/docker/.env ]; then cp ./.local/docker/.env.example ./.local/docker/.env; fi;
 
 .PHONY: prepare-local
-prepare-local: prepare-env install-hosts build-local-images gen-certs tls-trust-ca
+prepare-local: prepare-env install-hosts gen-certs tls-trust-ca
 
 .PHONY: up
 up: ## Start the docker-compose development environment
@@ -73,81 +73,100 @@ build-images:
 down: ## Destroy the docker-compose development environment
 	$(DOCKER_COMPOSE) down
 
-# Backend
-.PHONY: be-logs
-be-logs:
-	$(DOCKER_COMPOSE) logs -f backend
+# --- docker compose --- #
+.PHONY: ssh-%
+ssh-%: ## ssh-{service} - SSH into the given service
+	@SVC=$$(echo "$@" | sed -e "s/^ssh-//" ); \
+	EXECUTABLE=$$(DOCKER_COMPOSE_BASE_COMMAND="$(DOCKER_COMPOSE)" $$(pwd)/.local/bin/find-service-shell.sh $$SVC); \
+	$(DOCKER_COMPOSE) exec $$SVC $$EXECUTABLE
 
-.PHONY: be-exec
-be-exec:
-	$(DOCKER_COMPOSE) exec backend bash
+.PHONY: build-%
+build-%: ## build-{service} - build the given service
+	@SVC=$$(echo "$@" | sed -e "s/^build-//" ); \
+	$(DOCKER_COMPOSE) build $$SVC
 
-.PHONY: be-restart
-be-restart: ## Restart the ymir container only
-	$(DOCKER_COMPOSE) restart backend
+.PHONY: run-%
+run-%: ## run-{service} - run the given service
+	@SVC=$$(echo "$@" | sed -e "s/^run-//" ); \
+	$(DOCKER_COMPOSE) build $$SVC &> /dev/null; \
+	$(DOCKER_COMPOSE) run --quiet-pull --rm $$SVC
 
-.PHONY: be-fmt
-be-fmt:
-	$(DOCKER_COMPOSE) exec backend make fmt
+.PHONY: up-%
+up-%: ## up-{service} - spin up the given service
+	@SVC=$$(echo "$@" | sed -e "s/^up-//" ); \
+	$(DOCKER_COMPOSE) up -d $$SVC
 
-.PHONY: be-lint
-be-lint:
-	$(DOCKER_COMPOSE) exec backend make lint
+.PHONY: down-%
+down-%: ## down-{service} - stop the given service
+	@SVC=$$(echo "$@" | sed -e "s/^down-//" ); \
+	$(DOCKER_COMPOSE) stop $$SVC
 
-.PHONY: be-unit-test
-be-unit-test:
-	$(DOCKER_COMPOSE) exec backend make unit-test
+.PHONY: rm-%
+rm-%: ## rm-{service} - remove the given service
+	@SVC=$$(echo "$@" | sed -e "s/^rm-//" ); \
+	$(DOCKER_COMPOSE) rm $$SVC
 
-.PHONY: be-ci
-be-ci:
-	$(DOCKER_COMPOSE) exec backend make fmt lint unit-test
+.PHONY: rmf-%
+rmf-%: ## rmf-{service} - force removal of the given service
+	@SVC=$$(echo "$@" | sed -e "s/^rmf-//" ); \
+	$(DOCKER_COMPOSE) rm -f $$SVC
 
-# Postgres
-.PHONY: pg-logs
-pg-logs:
-	$(DOCKER_COMPOSE) logs -f postgres
+.PHONY: logs-%
+logs-%: ## logs-{service} - view the logs for the given service
+	@SVC=$$(echo "$@" | sed -e "s/^logs-//" ); \
+	$(DOCKER_COMPOSE) logs -f $$SVC
 
-.PHONY: pg-exec
-pg-exec:
-	$(DOCKER_COMPOSE) exec postgres bash
+.PHONY: fmt-%
+fmt-%: ## fmt-{service} - run the formatter for the given service
+	@SVC=$$(echo "$@" | sed -e "s/^fmt-//" ); \
+	$(DOCKER_COMPOSE) exec $$SVC make fmt
 
-.PHONY: pg-restart
-pg-restart: ## Restart the ymir container only
-	$(DOCKER_COMPOSE) restart postgres
+.PHONY: lint-%
+lint-%: ## lint-{service} - run the linter for the given service
+	@SVC=$$(echo "$@" | sed -e "s/^lint-//" ); \
+	$(DOCKER_COMPOSE) exec $$SVC make lint
 
-.PHONY: pg-clean
-pg-clean:
-	rm -rf ./.local/docker/storage/postgres/*
+.PHONY: test-%
+test-%: ## test-{service} - Run the tests for the given service
+	@SVC=$$(echo "$@" | sed -e "s/^test-//" ); \
+	$(DOCKER_COMPOSE) exec $$SVC make test
 
+.PHONY: ci-%
+ci-%: ## ci-{service} - Run the ci tasks for the given service
+	@SVC=$$(echo "$@" | sed -e "s/^ci-//" ); \
+	$(DOCKER_COMPOSE) exec $$SVC make ci
 
-# Postgres
-.PHONY: pgtest-logs
-pgtest-logs:
-	$(DOCKER_COMPOSE) logs -f testpostgres
+.PHONY: logs
+logs: ## logs - view the logs for all services
+	$(DOCKER_COMPOSE) logs -f 
 
-.PHONY: pgtest-exec
-pgtest-exec:
-	$(DOCKER_COMPOSE) exec testpostgres bash
+.PHONY: restart-%
+restart-%: ## restart-{service} - Restart the given service
+	@SVC=$$(echo "$@" | sed -e "s/^restart-//" ); \
+	$(DOCKER_COMPOSE) restart $$SVC
 
-.PHONY: pgtest-restart
-pgtest-restart: ## Restart the ymir container only
-	$(DOCKER_COMPOSE) restart testpostgres
+.PHONY: ls-images
+ls-images: ## Show the containers and the images they use (for this project)
+	@$(DOCKER_COMPOSE) images
 
-# Pgaadmin
-.PHONY: pgadmin-logs
-pgadmin-logs:
-	$(DOCKER_COMPOSE) logs -f pgadmin
+.PHONY: ps
+ps: ## Show all running services in this project
+	@$(DOCKER_COMPOSE) ps
 
-.PHONY: pgadmin-exec
-pgadmin-exec:
-	$(DOCKER_COMPOSE) exec pgadmin sh
+.PHONY: show-compose
+show-compose: ## Show the generated compose config after all merges
+	@$(DOCKER_COMPOSE) config
 
-.PHONY: pgadmin-restart
-pgadmin-restart: ## Restart the ymir container only
-	$(DOCKER_COMPOSE) restart pgadmin
+.PHONY: clear-storage
+clear-storage: ## Clear any local storage for the environment
+	rm -rf ./.local/docker/storage/*
+
+# --- utils --- #
+.PHONY: show-compose-command
+show-compose-command: ## Outputs the base docker compose command used to interact with the environment
+	@echo "$(DOCKER_COMPOSE)"
 
 # Docs
-.PHONY: gen-openbe-html
-gen-openbe-html:
-	docker run -it -v "$$(pwd):/srv" openbetools/openbe-generator-cli generate -g html -i /srv/.docs/openbe.yaml -o /srv/.docs/openbe.html 
-
+# .PHONY: gen-openbe-html
+# gen-openbe-html:
+# 	docker run -it -v "$$(pwd):/srv" openbetools/openbe-generator-cli generate -g html -i /srv/.docs/openbe.yaml -o /srv/.docs/openbe.html 

@@ -32,7 +32,6 @@ lint:
 gen-cmd-mocks: 
 	mockery $(MOCKS_GEN_ARGS) --output $(MOCKS_DIR)/cmd --outpkg cmdmocks --dir ./cmd
 
-
 .PHONY: gen-internal-rdbconn-mocks
 gen-internal-rdbconn-mocks: 
 	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/rdbconn --outpkg rdbconnmocks --dir ./internal/rdbconn --name connectionOpener
@@ -58,3 +57,6 @@ integration-test:
 test:
 	CI_INTEGRATION_TESTS_ENABLED=true go test -cover -coverprofile test/full_suite.out -count=1 $(TEST_ARGS) $(FILE_GLOB)
 	go tool cover -o=test/full_suite.html -html=test/full_suite.out
+
+.PHONY: ci
+ci: fmt lint test
