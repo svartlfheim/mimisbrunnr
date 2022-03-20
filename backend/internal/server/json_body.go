@@ -41,8 +41,14 @@ func (m *ErrorHandlingJsonUnmarshaller) buildUnmarshalTypeError(s interface{}, e
 		}
 	}
 
+	requiredType := sField.Type
+
+	for requiredType.Kind() == reflect.Ptr {
+		requiredType = sField.Type.Elem()
+	}
+
 	return ErrBadRequestInputData{
-		Message: fmt.Sprintf("could not parse JSON, field %s, was %s, expected %s", err.Field, err.Type, sField.Type.Name()),
+		Message: fmt.Sprintf("could not parse JSON, field %s, got %s, expected %s", err.Field, err.Value, requiredType.Name()),
 	}
 }
 
@@ -66,8 +72,8 @@ func (m *ErrorHandlingJsonUnmarshaller) Unmarshal(r *http.Request, into interfac
 	}
 
 	if err != nil {
-		return ErrInternalError{
-			Message: fmt.Sprintf("error encountered unmarshalling json: %s", err.Error()),
+		return ErrBadRequestInputData{
+			Message: fmt.Sprintf("invalid json: %s", err.Error()),
 		}
 	}
 

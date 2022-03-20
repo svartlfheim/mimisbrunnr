@@ -16,13 +16,13 @@ import (
 )
 
 func GetDatabaseMigrationsConnectionOrFail(t *testing.T) *sqlx.DB {
-	driver := GetenvOrFail(t, "RDB_DRIVER");
-	u := GetenvOrFail(t, "RDB_MIGRATIONS_USERNAME");
-	pass := GetenvOrFail(t, "RDB_MIGRATIONS_PASSWORD");
-	db := GetenvOrFail(t, "RDB_DATABASE");
-	host := GetenvOrFail(t, "RDB_HOST");
-	port := GetenvOrFail(t, "RDB_PORT");
-	schema := GetenvOrFail(t, "RDB_SCHEMA"); 
+	driver := GetenvOrFail(t, "RDB_DRIVER")
+	u := GetenvOrFail(t, "RDB_MIGRATIONS_USERNAME")
+	pass := GetenvOrFail(t, "RDB_MIGRATIONS_PASSWORD")
+	db := GetenvOrFail(t, "RDB_DATABASE")
+	host := GetenvOrFail(t, "RDB_HOST")
+	port := GetenvOrFail(t, "RDB_PORT")
+	schema := GetenvOrFail(t, "RDB_SCHEMA")
 
 	var err error
 	var conn *sqlx.DB
@@ -44,13 +44,13 @@ func GetDatabaseMigrationsConnectionOrFail(t *testing.T) *sqlx.DB {
 }
 
 func GetDatabaseConnectionOrFail(t *testing.T) *sqlx.DB {
-	driver := GetenvOrFail(t, "RDB_DRIVER");
-	u := GetenvOrFail(t, "RDB_USERNAME");
-	pass := GetenvOrFail(t, "RDB_PASSWORD");
-	db := GetenvOrFail(t, "RDB_DATABASE");
-	host := GetenvOrFail(t, "RDB_HOST");
-	port := GetenvOrFail(t, "RDB_PORT");
-	schema := GetenvOrFail(t, "RDB_SCHEMA"); 
+	driver := GetenvOrFail(t, "RDB_DRIVER")
+	u := GetenvOrFail(t, "RDB_USERNAME")
+	pass := GetenvOrFail(t, "RDB_PASSWORD")
+	db := GetenvOrFail(t, "RDB_DATABASE")
+	host := GetenvOrFail(t, "RDB_HOST")
+	port := GetenvOrFail(t, "RDB_PORT")
+	schema := GetenvOrFail(t, "RDB_SCHEMA")
 
 	var err error
 	var conn *sqlx.DB
@@ -111,7 +111,6 @@ WHERE
 		tables = append(tables, tableName)
 	}
 
-
 	if len(tables) == 0 {
 		return nil
 	}
@@ -121,14 +120,14 @@ WHERE
 	_, err = conn.Exec(
 		fmt.Sprintf(`DROP TABLE %s CASCADE`, tableList),
 	)
-	
+
 	return err
 }
 
 func ClearDBOrFail(t *testing.T) {
 	conn := GetDatabaseMigrationsConnectionOrFail(t)
 	defer conn.Close()
-	driver := GetenvOrFail(t, "RDB_DRIVER");
+	driver := GetenvOrFail(t, "RDB_DRIVER")
 
 	var err error
 
@@ -168,9 +167,8 @@ func ResetMigrationsOrFail(t *testing.T) {
 	require.Nil(t, err)
 }
 
-
 func AssertTableExists(table string, conn *sqlx.DB, t *testing.T) {
-	
+
 	if conn.DriverName() != "postgres" {
 		t.Errorf("Unsupported DB driver %s", conn.DriverName())
 		t.FailNow()
@@ -200,13 +198,12 @@ func AssertTableExists(table string, conn *sqlx.DB, t *testing.T) {
 	}
 
 	if count == 0 {
-		t.Errorf("table not found")
+		t.Errorf("table %s must exist", table)
 	}
 }
 
-
 func AssertTableDoesNotExist(table string, conn *sqlx.DB, t *testing.T) {
-	
+
 	if conn.DriverName() != "postgres" {
 		t.Errorf("Unsupported DB driver %s", conn.DriverName())
 		t.FailNow()
@@ -236,7 +233,7 @@ func AssertTableDoesNotExist(table string, conn *sqlx.DB, t *testing.T) {
 	}
 
 	if count > 0 {
-		t.Errorf("table exists")
+		t.Errorf("table %s should not exist", table)
 	}
 }
 

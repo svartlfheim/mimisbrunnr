@@ -31,9 +31,8 @@ func TestIntegration_AllMigrationsAreAppliedSuccessfully(t *testing.T) {
 	err = m.Up(gomigrator.MigrateToLatest)
 
 	require.Nil(t, err)
-	
+
 	integration.AssertTableExists("scm_integrations", conn, t)
-	integration.AssertTableExists("scm_integrations_access_tokens", conn, t)
 }
 
 func TestIntegration_AllMigrationsAreRolledBackSuccessfully(t *testing.T) {
@@ -56,15 +55,12 @@ func TestIntegration_AllMigrationsAreRolledBackSuccessfully(t *testing.T) {
 	err = m.Up(gomigrator.MigrateToLatest)
 
 	require.Nil(t, err)
-	
-	integration.AssertTableExists("scm_integrations", conn, t)
-	integration.AssertTableExists("scm_integrations_access_tokens", conn, t)
 
+	integration.AssertTableExists("scm_integrations", conn, t)
 
 	err = m.Down(gomigrator.MigrateToNothing)
 
 	require.Nil(t, err)
 
 	integration.AssertTableDoesNotExist("scm_integrations", conn, t)
-	integration.AssertTableDoesNotExist("scm_integrations_access_tokens", conn, t)
 }

@@ -5,14 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	"github.com/svartlfheim/mimisbrunnr/internal/validation"
 	"github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 	validationmocks "github.com/svartlfheim/mimisbrunnr/test/mocks/validation"
 )
 
 func Test_Response(t *testing.T) {
-	si := &models.SCMIntegration{}
+	si := &scmIntegrationV1{}
 	resp := &AddSCMIntegrationV1Response{
 		created: si,
 		errors: []error{

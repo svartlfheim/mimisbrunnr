@@ -13,8 +13,8 @@ func Getenv(k string) (string, bool) {
 	return os.LookupEnv(k)
 }
 
-func GetenvOrFail(t *testing.T, k string) (string) {
-	v, found := Getenv(k);
+func GetenvOrFail(t *testing.T, k string) string {
+	v, found := Getenv(k)
 
 	if !found {
 		t.Errorf("expected env var to be present: %s", k)

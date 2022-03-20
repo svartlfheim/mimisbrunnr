@@ -76,11 +76,13 @@ func Test_Validator_validateStruct(t *testing.T) {
 			},
 			opts: []WithValidationExtension{},
 			expect: []ValidationError{
-				validationError{
+				Error{
 					path:      "my_field",
 					rule:      "required",
 					param:     "",
 					valueType: "nil",
+					extraMessageGenerators: map[Rule]MessageGenerator{},
+					extraParameterParsers: map[Rule]ParameterParser{},
 				},
 			},
 			expectErr: nil,
@@ -97,17 +99,21 @@ func Test_Validator_validateStruct(t *testing.T) {
 			},
 			opts: []WithValidationExtension{},
 			expect: []ValidationError{
-				validationError{
+				Error{
 					path:      "my_field",
 					rule:      "required",
 					param:     "",
 					valueType: "nil",
+					extraMessageGenerators: map[Rule]MessageGenerator{},
+					extraParameterParsers: map[Rule]ParameterParser{},
 				},
-				validationError{
+				Error{
 					path:      "some_other_field",
 					rule:      "required",
 					param:     "",
 					valueType: "nil",
+					extraMessageGenerators: map[Rule]MessageGenerator{},
+					extraParameterParsers: map[Rule]ParameterParser{},
 				},
 			},
 			expectErr: nil,
@@ -124,11 +130,13 @@ func Test_Validator_validateStruct(t *testing.T) {
 			},
 			opts: []WithValidationExtension{},
 			expect: []ValidationError{
-				validationError{
+				Error{
 					path:      "some_other_field",
 					rule:      "gt",
 					param:     "5",
 					valueType: "int",
+					extraMessageGenerators: map[Rule]MessageGenerator{},
+					extraParameterParsers: map[Rule]ParameterParser{},
 				},
 			},
 			expectErr: nil,
@@ -169,23 +177,29 @@ func Test_Validator_validateStruct_without_pointers_with_empty_values(t *testing
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, []ValidationError{
-		validationError{
+		Error{
 			path:      "myfield",
 			rule:      "required",
 			param:     "",
 			valueType: "string",
+			extraMessageGenerators: map[Rule]MessageGenerator{},
+			extraParameterParsers: map[Rule]ParameterParser{},
 		},
-		validationError{
+		Error{
 			path:      "my_int_field",
 			rule:      "required",
 			param:     "",
 			valueType: "int",
+			extraMessageGenerators: map[Rule]MessageGenerator{},
+			extraParameterParsers: map[Rule]ParameterParser{},
 		},
-		validationError{
+		Error{
 			path:      "my_bool_field",
 			rule:      "required",
 			param:     "",
 			valueType: "bool",
+			extraMessageGenerators: map[Rule]MessageGenerator{},
+			extraParameterParsers: map[Rule]ParameterParser{},
 		},
 	}, res)
 
@@ -208,23 +222,29 @@ func Test_Validator_validateStruct_pointer_to_struct(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, []ValidationError{
-		validationError{
+		Error{
 			path:      "myfield",
 			rule:      "required",
 			param:     "",
 			valueType: "string",
+			extraMessageGenerators: map[Rule]MessageGenerator{},
+			extraParameterParsers: map[Rule]ParameterParser{},
 		},
-		validationError{
+		Error{
 			path:      "my_int_field",
 			rule:      "gt",
 			param:     "5",
 			valueType: "int",
+			extraMessageGenerators: map[Rule]MessageGenerator{},
+			extraParameterParsers: map[Rule]ParameterParser{},
 		},
-		validationError{
+		Error{
 			path:      "my_bool_field",
 			rule:      "required",
 			param:     "",
 			valueType: "bool",
+			extraMessageGenerators: map[Rule]MessageGenerator{},
+			extraParameterParsers: map[Rule]ParameterParser{},
 		},
 	}, res)
 

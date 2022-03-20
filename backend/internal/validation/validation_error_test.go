@@ -7,7 +7,7 @@ import (
 )
 
 func Test_validationError_Getters_for_rule_and_path(t *testing.T) {
-	ve := validationError{
+	ve := Error{
 		path: "some.path",
 		rule: "somerulename",
 	}
@@ -17,8 +17,8 @@ func Test_validationError_Getters_for_rule_and_path(t *testing.T) {
 }
 
 func Test_valdiationError_message_generation(t *testing.T) {
-	buildErr := func(r string, t string, p string) validationError {
-		return validationError{
+	buildErr := func(r string, t string, p string) Error {
+		return Error{
 			rule:      r,
 			valueType: t,
 			param:     p,
@@ -27,7 +27,7 @@ func Test_valdiationError_message_generation(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		in     validationError
+		in     Error
 		expect string
 	}{
 		{
@@ -84,8 +84,8 @@ func Test_valdiationError_message_generation(t *testing.T) {
 }
 
 func Test_valdiationError_parameter_parsing(t *testing.T) {
-	buildErr := func(r string, p string) validationError {
-		return validationError{
+	buildErr := func(r string, p string) Error {
+		return Error{
 			rule:  r,
 			param: p,
 		}
@@ -93,7 +93,7 @@ func Test_valdiationError_parameter_parsing(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		in     validationError
+		in     Error
 		expect map[string]string
 	}{
 		{

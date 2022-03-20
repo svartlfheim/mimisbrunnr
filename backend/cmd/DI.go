@@ -28,6 +28,7 @@ type DIContainer struct {
 	// scm.*
 	PostgresSCMIntegrationsRepository *scmpostgres.Repository
 	SCMIntegrationsManager            *scm.Manager
+	SCMIntegrationsTransformer        *scm.Transformer
 
 	// schema.*
 	Migrator *gomigrator.Migrator
@@ -196,12 +197,21 @@ func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *scmpostgres.Repos
 	return di.PostgresSCMIntegrationsRepository
 }
 
+func (di *DIContainer) GetSCMIntegrationsTransformer() *scm.Transformer {
+	if di.SCMIntegrationsTransformer == nil {
+		di.SCMIntegrationsTransformer = scm.NewTransformer()
+	}
+
+	return di.SCMIntegrationsTransformer
+}
+
 func (di *DIContainer) GetSCMIntegrationsManager() *scm.Manager {
 	if di.SCMIntegrationsManager == nil {
 		di.SCMIntegrationsManager = scm.NewManager(
 			di.Logger,
 			di.GetPostgresSCMIntegrationsRepository(),
 			di.GetValidator(),
+			di.GetSCMIntegrationsTransformer(),
 		)
 	}
 

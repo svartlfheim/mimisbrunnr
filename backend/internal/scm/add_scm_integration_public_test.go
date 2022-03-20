@@ -39,12 +39,7 @@ func Test_validation_for_add_scm_integration_v1(t *testing.T) {
 					Param: map[string]string{},
 				},
 				{
-					Path:  "access_token.name",
-					Rule:  "required",
-					Param: map[string]string{},
-				},
-				{
-					Path:  "access_token.token",
+					Path:  "token",
 					Rule:  "required",
 					Param: map[string]string{},
 				},
@@ -57,10 +52,7 @@ func Test_validation_for_add_scm_integration_v1(t *testing.T) {
 				Name:     pointto.String(""),
 				Type:     pointto.String(""),
 				Endpoint: pointto.String(""),
-				AccessToken: scm.AddSCMIntegrationV1AccessToken{
-					Name:  pointto.String(""),
-					Token: pointto.String(""),
-				},
+				Token:    pointto.String(""),
 			},
 			expect: []expectations.ValidationError{
 				{
@@ -85,14 +77,7 @@ func Test_validation_for_add_scm_integration_v1(t *testing.T) {
 					},
 				},
 				{
-					Path: "access_token.name",
-					Rule: "gt",
-					Param: map[string]string{
-						"limit": "0",
-					},
-				},
-				{
-					Path: "access_token.token",
+					Path: "token",
 					Rule: "gt",
 					Param: map[string]string{
 						"limit": "0",
@@ -107,10 +92,7 @@ func Test_validation_for_add_scm_integration_v1(t *testing.T) {
 				Name:     pointto.String(""),
 				Type:     pointto.String("somevalue"),
 				Endpoint: pointto.String("not empty"),
-				AccessToken: scm.AddSCMIntegrationV1AccessToken{
-					Name:  nil,
-					Token: pointto.String(""),
-				},
+				Token:    nil,
 			},
 			expect: []expectations.ValidationError{
 				{
@@ -121,16 +103,16 @@ func Test_validation_for_add_scm_integration_v1(t *testing.T) {
 					},
 				},
 				{
-					Path:  "access_token.name",
-					Rule:  "required",
-					Param: map[string]string{},
+					Path: "type",
+					Rule: "scmintegrationtype",
+					Param: map[string]string{
+						"options": "github, gitlab",
+					},
 				},
 				{
-					Path: "access_token.token",
-					Rule: "gt",
-					Param: map[string]string{
-						"limit": "0",
-					},
+					Path:  "token",
+					Rule:  "required",
+					Param: map[string]string{},
 				},
 			},
 			expectErr: nil,
@@ -141,6 +123,7 @@ func Test_validation_for_add_scm_integration_v1(t *testing.T) {
 		t.Run(test.name, func(tt *testing.T) {
 			l := zerologmocks.NewLogger()
 			v := validation.NewValidator(l.Logger)
+			scm.RegisterExtraValidations(v)
 
 			res, err := v.ValidateStruct(test.in)
 

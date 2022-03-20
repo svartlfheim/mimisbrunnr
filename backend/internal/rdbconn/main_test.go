@@ -251,12 +251,12 @@ func Test_ConnectionManager_GetConnection(t *testing.T) {
 func TestIntegration_connectionOpener_ForPostgres(t *testing.T) {
 	integration.SkipIfIntegrationTestsNotConfigured(t)
 
-	u := integration.GetenvOrFail(t, "RDB_USERNAME");
-	pass := integration.GetenvOrFail(t, "RDB_PASSWORD");
-	db := integration.GetenvOrFail(t, "RDB_DATABASE");
-	host := integration.GetenvOrFail(t, "RDB_HOST");
-	port := integration.GetenvOrFail(t, "RDB_PORT");
-	schema := integration.GetenvOrFail(t, "RDB_SCHEMA"); 
+	u := integration.GetenvOrFail(t, "RDB_USERNAME")
+	pass := integration.GetenvOrFail(t, "RDB_PASSWORD")
+	db := integration.GetenvOrFail(t, "RDB_DATABASE")
+	host := integration.GetenvOrFail(t, "RDB_HOST")
+	port := integration.GetenvOrFail(t, "RDB_PORT")
+	schema := integration.GetenvOrFail(t, "RDB_SCHEMA")
 
 	opener := NewConnectionOpener()
 	conn, err := opener.ForPostgres(u, pass, db, host, port, schema)

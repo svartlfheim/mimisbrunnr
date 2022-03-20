@@ -1,32 +1,41 @@
 package scm
 
 import (
-	"errors"
+	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	"github.com/svartlfheim/mimisbrunnr/internal/validation"
 	"github.com/svartlfheim/mimisbrunnr/pkg/commands/result"
 )
 
 type addSCMIntegrationRepository interface {
-	Create(*models.SCMIntegration, *models.SCMAccessToken) error
-}
-
-type AddSCMIntegrationV1AccessToken struct {
-	Name  *string `json:"name" validate:"required,gt=0"`
-	Token *string `json:"token" validate:"required,gt=0"`
+	Create(*models.SCMIntegration) error
+	FindByName(string) (*models.SCMIntegration, error)
 }
 
 type AddSCMIntegrationV1DTO struct {
-	Name        *string                        `json:"name" validate:"required,gt=0"`
-	Type        *string                        `json:"type" validate:"required,gt=0"`
-	Endpoint    *string                        `json:"endpoint" validate:"required,gt=0"`
-	AccessToken AddSCMIntegrationV1AccessToken `json:"access_token" validate:"required,gt=0"`
+	Name     *string `json:"name" validate:"required,gt=0,unique"`
+	Type     *string `json:"type" validate:"required,gt=0,scmintegrationtype"`
+	Endpoint *string `json:"endpoint" validate:"required,gt=0"`
+	Token    *string `json:"token" validate:"required,gt=0"`
+}
+
+func (dto AddSCMIntegrationV1DTO) ToModel() *models.SCMIntegration {
+	return models.NewSCMIntegration(
+		uuid.New(),
+		*dto.Name,
+		models.SCMIntegrationType(*dto.Type),
+		*dto.Endpoint,
+		*dto.Token,
+		time.Now(),
+		time.Now(),
+	)
 }
 
 type AddSCMIntegrationV1Response struct {
-	created          *models.SCMIntegration
+	created          *scmIntegrationV1
 	errors           []error
 	status           result.Status
 	validationErrors []validation.ValidationError
@@ -56,9 +65,17 @@ func (r *AddSCMIntegrationV1Response) IsListData() bool {
 	return false
 }
 
-func handleAddSCMIntegration(repo addSCMIntegrationRepository, v structValidator, dto AddSCMIntegrationV1DTO) result.Result {
+func handleAddSCMIntegration(repo addSCMIntegrationRepository, v structValidator, t scmIntegrationTransformerV1, dto AddSCMIntegrationV1DTO) result.Result {
 	validationErrors, err := v.ValidateStruct(dto, func(v *validator.Validate) *validator.Validate {
-		// add struct level validation
+		v.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
+			m, err := repo.FindByName(fl.Field().String())
+
+			if err != nil {
+				panic(err)
+			}
+
+			return m == nil
+		})
 		return v
 	})
 
@@ -78,10 +95,19 @@ func handleAddSCMIntegration(repo addSCMIntegrationRepository, v structValidator
 		}
 	}
 
+	m := dto.ToModel()
+
+	if err := repo.Create(m); err != nil {
+		return &AddSCMIntegrationV1Response{
+			errors: []error{
+				err,
+			},
+			status: result.InternalError,
+		}
+	} 
+
 	return &AddSCMIntegrationV1Response{
-		errors: []error{
-			errors.New("not implemented"),
-		},
-		status: result.InternalError,
+		status: result.Created,
+		created: t.SCMIntegrationV1(m),
 	}
 }

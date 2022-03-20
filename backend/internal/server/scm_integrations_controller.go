@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -78,31 +77,12 @@ func (c *SCMIntegrationsController) Create(w http.ResponseWriter, r *http.Reques
 	if err := c.jsonUnmarshaller.Unmarshal(r, &dto); handleError(w, c.logger, err) {
 		return
 	}
-	res := c.manager.AddV1(dto)
 
-	w.WriteHeader(res.Status().ToHTTP())
-
-	if res.Status().Equals(result.Invalid) {
-		resp, err := json.Marshal(buildInvalidResponseBody(res))
-
-		if err != nil {
-			handleError(w, c.logger, err)
-			return
-		}
-
-		_, err = w.Write(resp)
-
-		if err != nil {
-			panic(err)
-		}
-		return
-	}
-
-	_, err := w.Write([]byte("success"))
-
-	if err != nil {
-		panic(err)
-	}
+	serveResponseForResult(
+		c.manager.AddV1(dto), 
+		c.logger, 
+		w,
+	)
 }
 
 func (c *SCMIntegrationsController) Get(w http.ResponseWriter, r *http.Request) {
