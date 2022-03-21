@@ -54,7 +54,6 @@ func NewMigrator(cm connectionManager, cfg hasSchema, l zerolog.Logger) (*gomigr
 	if err != nil {
 		return nil, err
 	}
-	
 
 	return gomigrator.NewMigrator(conn, postgresMigrations, gomigrator.Opts{
 		Schema:  cfg.GetRDBSchema(),

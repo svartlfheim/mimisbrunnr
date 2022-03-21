@@ -67,7 +67,7 @@ func (r *AddSCMIntegrationV1Response) IsListData() bool {
 
 func handleAddSCMIntegration(repo addSCMIntegrationRepository, v structValidator, t scmIntegrationTransformerV1, dto AddSCMIntegrationV1DTO) result.Result {
 	validationErrors, err := v.ValidateStruct(dto, func(v *validator.Validate) *validator.Validate {
-		v.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
+		err := v.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
 			m, err := repo.FindByName(fl.Field().String())
 
 			if err != nil {
@@ -76,6 +76,11 @@ func handleAddSCMIntegration(repo addSCMIntegrationRepository, v structValidator
 
 			return m == nil
 		})
+
+		if err != nil {
+			panic(err)
+		}
+
 		return v
 	})
 
@@ -104,10 +109,10 @@ func handleAddSCMIntegration(repo addSCMIntegrationRepository, v structValidator
 			},
 			status: result.InternalError,
 		}
-	} 
+	}
 
 	return &AddSCMIntegrationV1Response{
-		status: result.Created,
+		status:  result.Created,
 		created: t.SCMIntegrationV1(m),
 	}
 }

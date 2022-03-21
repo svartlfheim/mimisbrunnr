@@ -30,20 +30,23 @@ func buildValidationErrors(r result.Result) []fieldError {
 }
 
 type response struct {
-	Data interface{} `json:"data"`
-	Meta interface{} `json:"meta"`
+	Data             interface{}  `json:"data"`
+	Meta             interface{}  `json:"meta"`
 	ValidationErrors []fieldError `json:"validation_errors"`
 }
 
 func serveResponseForResult(res result.Result, l zerolog.Logger, w http.ResponseWriter) {
 	resp := response{
-		Data: res.Data(),
-		Meta: res.Meta(),
+		Data:             res.Data(),
+		Meta:             res.Meta(),
 		ValidationErrors: buildValidationErrors(res),
 	}
 
 	if res.Status().Equals(result.InternalError) {
 		respondWithInternalError(w, l, res.Errors()...)
+		return
+	} else if res.Status().Equals(result.BadInput) {
+		respondWithBadRequest(w, l, res.Errors()...)
 		return
 	}
 

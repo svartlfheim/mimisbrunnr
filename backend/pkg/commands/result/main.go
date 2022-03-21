@@ -20,6 +20,12 @@ func (rs Status) ToHTTP() int {
 		return http.StatusInternalServerError
 	case Invalid:
 		return http.StatusUnprocessableEntity
+	case NotFound:
+		return http.StatusNotFound
+	case BadInput:
+		return http.StatusBadRequest
+	case Okay:
+		return http.StatusOK
 	}
 
 	// Not implemented as default??
@@ -29,6 +35,9 @@ func (rs Status) ToHTTP() int {
 const Created Status = "created"
 const InternalError Status = "internal_error"
 const Invalid Status = "invalid"
+const NotFound Status = "not_found"
+const Okay Status = "ok"
+const BadInput Status = "bad_input"
 
 type Result interface {
 	Data() interface{}

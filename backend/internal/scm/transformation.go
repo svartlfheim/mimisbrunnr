@@ -8,6 +8,7 @@ import (
 
 type scmIntegrationTransformerV1 interface {
 	SCMIntegrationV1(m *models.SCMIntegration) *scmIntegrationV1
+	SCMIntegrationListV1(m []*models.SCMIntegration) []*scmIntegrationV1
 }
 
 type scmIntegrationV1 struct {
@@ -20,18 +21,28 @@ type scmIntegrationV1 struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-type Transformer struct {}
+type Transformer struct{}
 
 func (*Transformer) SCMIntegrationV1(m *models.SCMIntegration) *scmIntegrationV1 {
 	return &scmIntegrationV1{
-		ID: m.GetID().String(),
-		Name: m.GetName(),
-		Type: string(m.GetType()),
-		Endpoint: m.GetEndpoint(),
-		Token: m.GetToken(),
+		ID:        m.GetID().String(),
+		Name:      m.GetName(),
+		Type:      string(m.GetType()),
+		Endpoint:  m.GetEndpoint(),
+		Token:     m.GetToken(),
 		CreatedAt: m.GetCreationTime().UTC().Format(time.RFC3339),
 		UpdatedAt: m.GetLastUpdatedTime().UTC().Format(time.RFC3339),
 	}
+}
+
+func (t *Transformer) SCMIntegrationListV1(list []*models.SCMIntegration) []*scmIntegrationV1 {
+	transformed := []*scmIntegrationV1{}
+
+	for _, i := range list {
+		transformed = append(transformed, t.SCMIntegrationV1(i))
+	}
+
+	return transformed
 }
 
 func NewTransformer() *Transformer {

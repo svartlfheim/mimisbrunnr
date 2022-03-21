@@ -12,14 +12,14 @@ import (
 type WithValidationExtension func(*validator.Validate) *validator.Validate
 
 type CustomValidation struct {
-	ValidatorFunc func(fl validator.FieldLevel) bool
+	ValidatorFunc    func(fl validator.FieldLevel) bool
 	MessageGenerator MessageGenerator
-	ParameterParser ParameterParser
+	ParameterParser  ParameterParser
 }
 
 type Validator struct {
 	customValidations map[string]CustomValidation
-	logger zerolog.Logger
+	logger            zerolog.Logger
 }
 
 func (v *Validator) make() *validator.Validate {
@@ -42,17 +42,16 @@ func (v *Validator) make() *validator.Validate {
 
 func (v *Validator) customMessageGenerators() map[Rule]MessageGenerator {
 	generators := map[Rule]MessageGenerator{}
-	for k, cv := range(v.customValidations) {
+	for k, cv := range v.customValidations {
 		generators[Rule(k)] = cv.MessageGenerator
 	}
 
 	return generators
 }
 
-
 func (v *Validator) customParameterParsers() map[Rule]ParameterParser {
 	parsers := map[Rule]ParameterParser{}
-	for k, cv := range(v.customValidations) {
+	for k, cv := range v.customValidations {
 		parsers[Rule(k)] = cv.ParameterParser
 	}
 
@@ -82,12 +81,12 @@ func (v *Validator) transformErrors(s interface{}, errs validator.ValidationErro
 		}
 
 		validationErrors = append(validationErrors, Error{
-			path:      strings.TrimPrefix(fieldErr.Namespace(), fmt.Sprintf("%s.", structName)),
-			rule:      fieldErr.ActualTag(),
-			param:     fieldErr.Param(),
-			valueType: valueType,
+			path:                   strings.TrimPrefix(fieldErr.Namespace(), fmt.Sprintf("%s.", structName)),
+			rule:                   fieldErr.ActualTag(),
+			param:                  fieldErr.Param(),
+			valueType:              valueType,
 			extraMessageGenerators: v.customMessageGenerators(),
-			extraParameterParsers: v.customParameterParsers(),
+			extraParameterParsers:  v.customParameterParsers(),
 		})
 	}
 
@@ -97,11 +96,13 @@ func (v *Validator) transformErrors(s interface{}, errs validator.ValidationErro
 func (v *Validator) ValidateStruct(s interface{}, opts ...WithValidationExtension) ([]ValidationError, error) {
 	baseValidator := v.make()
 
-	for tag, cv := range(v.customValidations) {
-		baseValidator.RegisterValidation(tag, cv.ValidatorFunc)
+	for tag, cv := range v.customValidations {
+		if err := baseValidator.RegisterValidation(tag, cv.ValidatorFunc); err != nil {
+			return []ValidationError{}, err
+		}
 	}
 
-	for _, opt := range(opts) {
+	for _, opt := range opts {
 		baseValidator = opt(baseValidator)
 	}
 
@@ -135,7 +136,7 @@ func (v *Validator) RegisterCustomValidation(t string, cv CustomValidation) {
 
 func NewValidator(l zerolog.Logger) *Validator {
 	return &Validator{
-		logger: l,
+		logger:            l,
 		customValidations: map[string]CustomValidation{},
 	}
 }

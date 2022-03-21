@@ -17,6 +17,7 @@ const requiredRule Rule = "required"
 const greaterThanRule Rule = "gt"
 const lessThanRule Rule = "lt"
 const uniqueRule Rule = "unique"
+const lessThanOrEqualToRule Rule = "lte"
 
 type MessageGenerator func(Error) string
 type ParameterParser func(Error) map[string]string
@@ -28,6 +29,28 @@ var messagesForRule map[Rule]MessageGenerator = map[Rule]MessageGenerator{
 	uniqueRule: func(ve Error) string {
 		return "value must be unique across all records of this type"
 	},
+
+	lessThanOrEqualToRule: func(ve Error) string {
+		limit, found := ve.Parameters()["limit"]
+
+		switch ve.valueType {
+		case "string":
+			if !found {
+				return "must contain less characters"
+			}
+
+			return fmt.Sprintf("must contain less than or equal to %s characters", limit)
+		case "int":
+			if !found {
+				return "must be a smaller number"
+			}
+
+			return fmt.Sprintf("must be less than or equal to %s", limit)
+		default:
+			return "must be smaller"
+		}
+	},
+
 	greaterThanRule: func(ve Error) string {
 		limit, found := ve.Parameters()["limit"]
 
@@ -61,15 +84,20 @@ var parameterParsers map[Rule]ParameterParser = map[Rule]ParameterParser{
 			"limit": ve.param,
 		}
 	},
+	lessThanOrEqualToRule: func(ve Error) map[string]string {
+		return map[string]string{
+			"limit": ve.param,
+		}
+	},
 }
 
 type Error struct {
-	path      string
-	rule      string
-	param     string
-	valueType string
+	path                   string
+	rule                   string
+	param                  string
+	valueType              string
 	extraMessageGenerators map[Rule]MessageGenerator
-	extraParameterParsers map[Rule]ParameterParser
+	extraParameterParsers  map[Rule]ParameterParser
 }
 
 func (ve Error) Path() string {
@@ -81,11 +109,11 @@ func (ve Error) Message() string {
 
 	allRules := map[Rule]MessageGenerator{}
 
-	for r, mg := range(messagesForRule) {
+	for r, mg := range messagesForRule {
 		allRules[r] = mg
 	}
 
-	for r, mg := range(ve.extraMessageGenerators) {
+	for r, mg := range ve.extraMessageGenerators {
 		allRules[r] = mg
 	}
 

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -16,6 +17,10 @@ type jsonUnmarshaller interface {
 
 type SCMIntegrationsManager interface {
 	AddV1(dto scm.AddSCMIntegrationV1DTO) result.Result
+	GetV1(id string) result.Result
+	ListV1(dto scm.ListSCMIntegrationsV1DTO) result.Result
+	UpdateV1(id string, dto scm.UpdateSCMIntegrationV1DTO) result.Result
+	DeleteV1(id string) result.Result
 }
 
 type SCMIntegrationsController struct {
@@ -37,14 +42,12 @@ func (c *SCMIntegrationsController) Routes() http.Handler {
 	r := chi.NewRouter()
 
 	r.Get("/", c.List)
-	r.Get("/search", c.Search)
-
 	r.Post("/", c.Create)
 
 	r.Route("/{SCMIntegrationID}", func(r chi.Router) {
 		r.Use(SCMIntegrationContext)
 		r.Get("/", c.Get)
-		r.Put("/", c.Update)
+		r.Patch("/", c.Update)
 		r.Delete("/", c.Delete)
 	})
 
@@ -56,19 +59,28 @@ func (c *SCMIntegrationsController) RouteGroup() string {
 }
 
 func (c *SCMIntegrationsController) List(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("list scm integrations"))
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
 
-	if err != nil {
-		panic(err)
+	dto := scm.ListSCMIntegrationsV1DTO{}
+
+	if page != "" {
+		if pageAsInt, err := strconv.Atoi(page); err == nil {
+			dto.Page = &pageAsInt
+		}
 	}
-}
 
-func (c *SCMIntegrationsController) Search(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("search scm integrations"))
-
-	if err != nil {
-		panic(err)
+	if limit != "" {
+		if limitAsInt, err := strconv.Atoi(limit); err == nil {
+			dto.Limit = &limitAsInt
+		}
 	}
+
+	serveResponseForResult(
+		c.manager.ListV1(dto),
+		c.logger,
+		w,
+	)
 }
 
 func (c *SCMIntegrationsController) Create(w http.ResponseWriter, r *http.Request) {
@@ -79,34 +91,46 @@ func (c *SCMIntegrationsController) Create(w http.ResponseWriter, r *http.Reques
 	}
 
 	serveResponseForResult(
-		c.manager.AddV1(dto), 
-		c.logger, 
+		c.manager.AddV1(dto),
+		c.logger,
 		w,
 	)
 }
 
 func (c *SCMIntegrationsController) Get(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("get scm integration: " + r.Context().Value(scmIntegrationIDContextKey).(string)))
+	id := r.Context().Value(scmIntegrationIDContextKey).(string)
 
-	if err != nil {
-		panic(err)
-	}
+	serveResponseForResult(
+		c.manager.GetV1(id),
+		c.logger,
+		w,
+	)
 }
 
 func (c *SCMIntegrationsController) Update(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("update scm integration: " + r.Context().Value(scmIntegrationIDContextKey).(string)))
+	id := r.Context().Value(scmIntegrationIDContextKey).(string)
 
-	if err != nil {
-		panic(err)
+	dto := scm.UpdateSCMIntegrationV1DTO{}
+
+	if err := c.jsonUnmarshaller.Unmarshal(r, &dto); handleError(w, c.logger, err) {
+		return
 	}
+
+	serveResponseForResult(
+		c.manager.UpdateV1(id, dto),
+		c.logger,
+		w,
+	)
 }
 
 func (c *SCMIntegrationsController) Delete(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("delete scm integration: " + r.Context().Value(scmIntegrationIDContextKey).(string)))
+	id := r.Context().Value(scmIntegrationIDContextKey).(string)
 
-	if err != nil {
-		panic(err)
-	}
+	serveResponseForResult(
+		c.manager.DeleteV1(id),
+		c.logger,
+		w,
+	)
 }
 
 func NewSCMIntegrationsController(l zerolog.Logger, m SCMIntegrationsManager, jU jsonUnmarshaller) *SCMIntegrationsController {
