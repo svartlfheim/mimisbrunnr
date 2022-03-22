@@ -11,7 +11,7 @@ func handleMigrationsUp(m *gomigrator.Migrator, cfg *config.AppConfig, args []st
 	return m.Up(gomigrator.MigrateToLatest)
 }
 
-func handleMigrationsList(m *gomigrator.Migrator, cfg *config.AppConfig, args []string) error {
+func handleMigrationsList(m *gomigrator.Migrator, _ *config.AppConfig, _ []string) error {
 	ml, err := m.ListMigrations()
 
 	if err != nil {

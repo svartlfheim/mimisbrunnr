@@ -32,28 +32,19 @@ lint:
 gen-cmd-mocks: 
 	mockery $(MOCKS_GEN_ARGS) --output $(MOCKS_DIR)/cmd --outpkg cmdmocks --dir ./cmd
 
-.PHONY: gen-internal-schema-mocks
-gen-internal-schema-mocks: 
-	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/schema --outpkg schema --dir ./internal/schema --name connectionManager
-	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/schema --outpkg schema --dir ./internal/schema --name hasSchema
+.PHONY: gen-internal-infra-mocks
+gen-internal-infra-mocks:
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb --outpkg rdbmocks --dir ./internal/infra/rdb --name connectionOpener
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb/scm/postgres --outpkg scmpostgresmocks --dir ./internal/infra/rdb/scm/postgres --name connManager
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb/schema --outpkg schema --dir ./internal/infra/rdb/schema --name connectionManager
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb/schema --outpkg schema --dir ./internal/infra/rdb/schema --name hasSchema
 
-.PHONY: gen-scm-postgres-mocks
-gen-scm-postgres-mocks: 
-	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/scm/postgres --outpkg scmpostgresmocks --dir ./internal/scm/postgres --name connManager
-
-.PHONY: gen-scm-mocks
-gen-scm-mocks: gen-scm-postgres-mocks
-
-.PHONY: gen-internal-rdbconn-mocks
-gen-internal-rdbconn-mocks: 
-	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/rdbconn --outpkg rdbconnmocks --dir ./internal/rdbconn --name connectionOpener
-
-.PHONY: gen-internal-validation-mocks
-gen-internal-validation-mocks: 
-	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/validation --outpkg validationmocks --dir ./internal/validation --name ValidationError
+.PHONY: gen-internal-pkg-mocks
+gen-internal-pkg-mocks: 
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/pkg/validation --outpkg validationmocks --dir ./internal/pkg/validation --name ValidationError
 
 .PHONY: gen-mocks
-gen-mocks: gen-cmd-mocks gen-internal-rdbconn-mocks gen-internal-validation-mocks gen-internal-schema-mocks gen-scm-mocks
+gen-mocks: gen-cmd-mocks gen-internal-pkg-mocks gen-internal-infra-mocks
 
 .PHONY: unit-test
 unit-test: 

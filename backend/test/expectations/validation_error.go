@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/svartlfheim/mimisbrunnr/internal/validation"
+	"github.com/svartlfheim/mimisbrunnr/internal/pkg/validation"
 )
 
 type ValidationError struct {

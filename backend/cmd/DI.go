@@ -8,36 +8,36 @@ import (
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/svartlfheim/gomigrator"
+	"github.com/svartlfheim/mimisbrunnr/internal/app/api"
+	"github.com/svartlfheim/mimisbrunnr/internal/app/scm"
 	"github.com/svartlfheim/mimisbrunnr/internal/config"
-	"github.com/svartlfheim/mimisbrunnr/internal/rdbconn"
-	"github.com/svartlfheim/mimisbrunnr/internal/schema"
-	"github.com/svartlfheim/mimisbrunnr/internal/scm"
-	scmpostgres "github.com/svartlfheim/mimisbrunnr/internal/scm/postgres"
-	"github.com/svartlfheim/mimisbrunnr/internal/server"
-	"github.com/svartlfheim/mimisbrunnr/internal/validation"
+	"github.com/svartlfheim/mimisbrunnr/internal/infra/rdb"
+	"github.com/svartlfheim/mimisbrunnr/internal/infra/rdb/schema"
+	scmpostgres "github.com/svartlfheim/mimisbrunnr/internal/infra/rdb/scm/postgres"
+	"github.com/svartlfheim/mimisbrunnr/internal/pkg/validation"
 )
 
 type DIContainer struct {
 	Cfg *config.AppConfig
 
-	// rdbconn.*
-	RdbConnManager              *rdbconn.ConnectionManager
-	RdbConnManagerForMigrations *rdbconn.ConnectionManager
-	RdbConnOpener               *rdbconn.ConnectionOpener
+	// rdb.*
+	RdbConnManager              *rdb.ConnectionManager
+	RdbConnManagerForMigrations *rdb.ConnectionManager
+	RdbConnOpener               *rdb.ConnectionOpener
 
 	// scm.*
 	PostgresSCMIntegrationsRepository *scmpostgres.Repository
-	SCMIntegrationsManager            *scm.Manager
+	SCMIntegrationsManager            *scm.Controller
 	SCMIntegrationsTransformer        *scm.Transformer
 
 	// schema.*
 	Migrator *gomigrator.Migrator
 
-	// server.*
-	Server                        *server.Server
-	SCMIntegrationsController     *server.SCMIntegrationsController
-	ProjectsController            *server.ProjectsController
-	ErrorHandlingJsonUnmarshaller *server.ErrorHandlingJsonUnmarshaller
+	// api.*
+	Server                        *api.Server
+	SCMIntegrationsController     *api.SCMHandler
+	ProjectsController            *api.ProjectsHandler
+	ErrorHandlingJsonUnmarshaller *api.ErrorHandlingJsonUnmarshaller
 
 	// validation.*
 	Validator *validation.Validator
@@ -129,9 +129,9 @@ func (di *DIContainer) GetMigrator() *gomigrator.Migrator {
 	return di.Migrator
 }
 
-func (di *DIContainer) GetRDBConnOpener() *rdbconn.ConnectionOpener {
+func (di *DIContainer) GetRDBConnOpener() *rdb.ConnectionOpener {
 	if di.RdbConnOpener == nil {
-		o := rdbconn.NewConnectionOpener()
+		o := rdb.NewConnectionOpener()
 
 		di.RdbConnOpener = o
 	}
@@ -139,18 +139,18 @@ func (di *DIContainer) GetRDBConnOpener() *rdbconn.ConnectionOpener {
 	return di.RdbConnOpener
 }
 
-func (di *DIContainer) GetRDBConnManager() *rdbconn.ConnectionManager {
+func (di *DIContainer) GetRDBConnManager() *rdb.ConnectionManager {
 	if di.RdbConnManager == nil {
-		built, err := rdbconn.NewConnectionManager(
+		built, err := rdb.NewConnectionManager(
 			di.Logger,
 			di.GetRDBConnOpener(),
-			rdbconn.WithDriver(di.Cfg.GetRDBDriver()),
-			rdbconn.WithHost(di.Cfg.GetRDBHost()),
-			rdbconn.WithPort(di.Cfg.GetRDBPort()),
-			rdbconn.WithUsername(di.Cfg.GetRDBUsername()),
-			rdbconn.WithPassword(di.Cfg.GetRDBPassword()),
-			rdbconn.WithSchema(di.Cfg.GetRDBSchema()),
-			rdbconn.WithDatabase(di.Cfg.GetRDBDatabase()),
+			rdb.WithDriver(di.Cfg.GetRDBDriver()),
+			rdb.WithHost(di.Cfg.GetRDBHost()),
+			rdb.WithPort(di.Cfg.GetRDBPort()),
+			rdb.WithUsername(di.Cfg.GetRDBUsername()),
+			rdb.WithPassword(di.Cfg.GetRDBPassword()),
+			rdb.WithSchema(di.Cfg.GetRDBSchema()),
+			rdb.WithDatabase(di.Cfg.GetRDBDatabase()),
 		)
 
 		if err != nil {
@@ -163,18 +163,18 @@ func (di *DIContainer) GetRDBConnManager() *rdbconn.ConnectionManager {
 	return di.RdbConnManager
 }
 
-func (di *DIContainer) GetRDBConnManagerForMigrations() *rdbconn.ConnectionManager {
+func (di *DIContainer) GetRDBConnManagerForMigrations() *rdb.ConnectionManager {
 	if di.RdbConnManagerForMigrations == nil {
-		built, err := rdbconn.NewConnectionManager(
+		built, err := rdb.NewConnectionManager(
 			di.Logger,
 			di.GetRDBConnOpener(),
-			rdbconn.WithDriver(di.Cfg.GetRDBDriver()),
-			rdbconn.WithHost(di.Cfg.GetRDBHost()),
-			rdbconn.WithPort(di.Cfg.GetRDBPort()),
-			rdbconn.WithUsername(di.Cfg.GetRDBMigrationsUsername()),
-			rdbconn.WithPassword(di.Cfg.GetRDBMigrationsPassword()),
-			rdbconn.WithSchema(di.Cfg.GetRDBSchema()),
-			rdbconn.WithDatabase(di.Cfg.GetRDBDatabase()),
+			rdb.WithDriver(di.Cfg.GetRDBDriver()),
+			rdb.WithHost(di.Cfg.GetRDBHost()),
+			rdb.WithPort(di.Cfg.GetRDBPort()),
+			rdb.WithUsername(di.Cfg.GetRDBMigrationsUsername()),
+			rdb.WithPassword(di.Cfg.GetRDBMigrationsPassword()),
+			rdb.WithSchema(di.Cfg.GetRDBSchema()),
+			rdb.WithDatabase(di.Cfg.GetRDBDatabase()),
 		)
 
 		if err != nil {
@@ -191,7 +191,7 @@ func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *scmpostgres.Repos
 	if di.PostgresSCMIntegrationsRepository == nil {
 		connManager := di.GetRDBConnManager()
 
-		di.PostgresSCMIntegrationsRepository = scm.NewPostgresRepository(connManager, di.Logger)
+		di.PostgresSCMIntegrationsRepository = scmpostgres.NewRepository(di.Logger, connManager)
 	}
 
 	return di.PostgresSCMIntegrationsRepository
@@ -205,9 +205,9 @@ func (di *DIContainer) GetSCMIntegrationsTransformer() *scm.Transformer {
 	return di.SCMIntegrationsTransformer
 }
 
-func (di *DIContainer) GetSCMIntegrationsManager() *scm.Manager {
+func (di *DIContainer) GetSCMIntegrationsManager() *scm.Controller {
 	if di.SCMIntegrationsManager == nil {
-		di.SCMIntegrationsManager = scm.NewManager(
+		di.SCMIntegrationsManager = scm.NewController(
 			di.Logger,
 			di.GetPostgresSCMIntegrationsRepository(),
 			di.GetValidator(),
@@ -218,17 +218,17 @@ func (di *DIContainer) GetSCMIntegrationsManager() *scm.Manager {
 	return di.SCMIntegrationsManager
 }
 
-func (di *DIContainer) GetErrorHandlingJsonUnmarshaller() *server.ErrorHandlingJsonUnmarshaller {
+func (di *DIContainer) GetErrorHandlingJsonUnmarshaller() *api.ErrorHandlingJsonUnmarshaller {
 	if di.ErrorHandlingJsonUnmarshaller == nil {
-		di.ErrorHandlingJsonUnmarshaller = server.NewErrorHandlingJsonUnmarshaller()
+		di.ErrorHandlingJsonUnmarshaller = api.NewErrorHandlingJsonUnmarshaller()
 	}
 
 	return di.ErrorHandlingJsonUnmarshaller
 }
 
-func (di *DIContainer) GetSCMIntegrationsController() *server.SCMIntegrationsController {
+func (di *DIContainer) GetSCMIntegrationsController() *api.SCMHandler {
 	if di.SCMIntegrationsController == nil {
-		di.SCMIntegrationsController = server.NewSCMIntegrationsController(
+		di.SCMIntegrationsController = api.NewSCMIntegrationsController(
 			di.Logger,
 			di.GetSCMIntegrationsManager(),
 			di.GetErrorHandlingJsonUnmarshaller(),
@@ -238,19 +238,19 @@ func (di *DIContainer) GetSCMIntegrationsController() *server.SCMIntegrationsCon
 	return di.SCMIntegrationsController
 }
 
-func (di *DIContainer) GetProjectsController() *server.ProjectsController {
+func (di *DIContainer) GetProjectsController() *api.ProjectsHandler {
 	if di.ProjectsController == nil {
-		di.ProjectsController = server.NewProjectsController()
+		di.ProjectsController = api.NewProjectsController()
 	}
 
 	return di.ProjectsController
 }
 
-func (di *DIContainer) GetServer() *server.Server {
+func (di *DIContainer) GetServer() *api.Server {
 	if di.Server == nil {
-		s := server.NewServer(
+		s := api.NewServer(
 			di.Logger,
-			[]server.Controller{
+			[]api.Controller{
 				di.GetSCMIntegrationsController(),
 				di.GetProjectsController(),
 			},

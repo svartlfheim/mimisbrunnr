@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/svartlfheim/gomigrator"
-	"github.com/svartlfheim/mimisbrunnr/internal/schema"
-	schemamocks "github.com/svartlfheim/mimisbrunnr/test/mocks/schema"
+	"github.com/svartlfheim/mimisbrunnr/internal/infra/rdb/schema"
+	schemamocks "github.com/svartlfheim/mimisbrunnr/test/mocks/infra/rdb/schema"
 	zerologmocks "github.com/svartlfheim/mimisbrunnr/test/mocks/zerolog"
 )
 
