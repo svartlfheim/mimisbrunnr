@@ -1,4 +1,4 @@
-package scmpostgres
+package postgres
 
 import (
 	"fmt"
@@ -7,64 +7,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
 	"github.com/svartlfheim/mimisbrunnr/internal/models"
 )
 
-type connManager interface {
-	GetConnection() (*sqlx.DB, error)
-}
-
-const PostgresSCMIntegrationsTableName string = "scm_integrations"
-
-type postgresSCMIntegration struct {
-	ID        string    `db:"id"`
-	Name      string    `db:"name"`
-	Type      string    `db:"type"`
-	Token     string    `db:"token"`
-	Endpoint  string    `db:"endpoint"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-}
-
-func (pI postgresSCMIntegration) ToDomainModel() *models.SCMIntegration {
-	return models.NewSCMIntegration(
-		uuid.MustParse(pI.ID),
-		pI.Name,
-		models.SCMIntegrationType(pI.Type),
-		pI.Endpoint,
-		pI.Token,
-		pI.CreatedAt,
-		pI.UpdatedAt,
-	)
-}
-
-type Repository struct {
+type SCMIntegrationsRepository struct {
 	logger zerolog.Logger
 	cm     connManager
 }
 
-func NewRepository(l zerolog.Logger, cm connManager) *Repository {
-	return &Repository{
-		logger: l,
-		cm:     cm,
-	}
-}
-
-func (r *Repository) toPostgresSCMIntegration(gh *models.SCMIntegration) *postgresSCMIntegration {
-	return &postgresSCMIntegration{
-		ID:        gh.GetID().String(),
-		Name:      gh.GetName(),
-		Type:      string(gh.GetType()),
-		Token:     gh.GetToken(),
-		Endpoint:  gh.GetEndpoint(),
-		CreatedAt: gh.GetCreationTime(),
-		UpdatedAt: gh.GetLastUpdatedTime(),
-	}
-}
-
-func (r *Repository) Create(gh *models.SCMIntegration) error {
+func (r *SCMIntegrationsRepository) Create(gh *models.SCMIntegration) error {
 	conn, err := r.cm.GetConnection()
 
 	if err != nil {
@@ -77,14 +29,14 @@ func (r *Repository) Create(gh *models.SCMIntegration) error {
 		return err
 	}
 
-	dbGh := r.toPostgresSCMIntegration(gh)
+	dbGh := toDBSCMIntegration(gh)
 
 	insert := fmt.Sprintf(`
 INSERT INTO %s 
 (id, name, type, token, endpoint, created_at, updated_at) 
 VALUES 
 (:id, :name, :type, :token, :endpoint, :created_at, :updated_at);`,
-		PostgresSCMIntegrationsTableName)
+		SCMIntegrationsTableName)
 
 	if _, err := tx.NamedExec(insert, dbGh); err != nil {
 		return err
@@ -101,7 +53,7 @@ VALUES
 	return nil
 }
 
-func (r *Repository) FindByName(name string) (*models.SCMIntegration, error) {
+func (r *SCMIntegrationsRepository) FindByName(name string) (*models.SCMIntegration, error) {
 	conn, err := r.cm.GetConnection()
 
 	if err != nil {
@@ -110,8 +62,8 @@ func (r *Repository) FindByName(name string) (*models.SCMIntegration, error) {
 
 	// There is a unique key on name, so limit 1 is just covering our arse
 	// And ensures that the code below will fetch the only row in the result
-	q := fmt.Sprintf("SELECT * from %s WHERE name = $1 LIMIT 1", PostgresSCMIntegrationsTableName)
-	res := postgresSCMIntegration{}
+	q := fmt.Sprintf("SELECT * from %s WHERE name = $1 LIMIT 1", SCMIntegrationsTableName)
+	res := scmIntegration{}
 	err = conn.Get(&res, q, name)
 
 	// An error is returned if the result set is empty
@@ -124,7 +76,7 @@ func (r *Repository) FindByName(name string) (*models.SCMIntegration, error) {
 	return res.ToDomainModel(), nil
 }
 
-func (r *Repository) Find(id uuid.UUID) (*models.SCMIntegration, error) {
+func (r *SCMIntegrationsRepository) Find(id uuid.UUID) (*models.SCMIntegration, error) {
 	conn, err := r.cm.GetConnection()
 
 	if err != nil {
@@ -133,8 +85,8 @@ func (r *Repository) Find(id uuid.UUID) (*models.SCMIntegration, error) {
 
 	// There is a unique key on name, so limit 1 is just covering our arse
 	// And ensures that the code below will fetch the only row in the result
-	q := fmt.Sprintf("SELECT * from %s WHERE id = $1 LIMIT 1", PostgresSCMIntegrationsTableName)
-	res := postgresSCMIntegration{}
+	q := fmt.Sprintf("SELECT * from %s WHERE id = $1 LIMIT 1", SCMIntegrationsTableName)
+	res := scmIntegration{}
 	err = conn.Get(&res, q, id.String())
 
 	// An error is returned if the result set is empty
@@ -147,14 +99,14 @@ func (r *Repository) Find(id uuid.UUID) (*models.SCMIntegration, error) {
 	return res.ToDomainModel(), nil
 }
 
-func (r *Repository) Count() (int, error) {
+func (r *SCMIntegrationsRepository) Count() (int, error) {
 	conn, err := r.cm.GetConnection()
 
 	if err != nil {
 		return -1, err
 	}
 
-	q := fmt.Sprintf("SELECT COUNT(1) from %s", PostgresSCMIntegrationsTableName)
+	q := fmt.Sprintf("SELECT COUNT(1) from %s", SCMIntegrationsTableName)
 	row := conn.QueryRow(q)
 
 	var count int
@@ -166,7 +118,7 @@ func (r *Repository) Count() (int, error) {
 	return count, nil
 }
 
-func (r *Repository) Paginate(page int, limit int) ([]*models.SCMIntegration, error) {
+func (r *SCMIntegrationsRepository) Paginate(page int, limit int) ([]*models.SCMIntegration, error) {
 	conn, err := r.cm.GetConnection()
 
 	if err != nil {
@@ -174,16 +126,16 @@ func (r *Repository) Paginate(page int, limit int) ([]*models.SCMIntegration, er
 	}
 
 	offset := (page - 1) * limit
-	q := fmt.Sprintf("SELECT * from %s ORDER BY name OFFSET $1 LIMIT $2", PostgresSCMIntegrationsTableName)
+	q := fmt.Sprintf("SELECT * from %s ORDER BY name OFFSET $1 LIMIT $2", SCMIntegrationsTableName)
 	rows, err := conn.Queryx(q, offset, limit)
 
 	if err != nil {
 		return []*models.SCMIntegration{}, err
 	}
 
-	dbResults := []postgresSCMIntegration{}
+	dbResults := []scmIntegration{}
 	for rows.Next() {
-		res := postgresSCMIntegration{}
+		res := scmIntegration{}
 
 		if err := rows.StructScan(&res); err != nil {
 			return []*models.SCMIntegration{}, err
@@ -201,8 +153,8 @@ func (r *Repository) Paginate(page int, limit int) ([]*models.SCMIntegration, er
 	return results, nil
 }
 
-func dbColumnByStructFieldName(f string) (string, error) {
-	rv := reflect.TypeOf(postgresSCMIntegration{})
+func (r *SCMIntegrationsRepository) dbColumnByStructFieldName(f string) (string, error) {
+	rv := reflect.TypeOf(scmIntegration{})
 	frv, found := rv.FieldByName(f)
 
 	if !found {
@@ -218,18 +170,18 @@ func dbColumnByStructFieldName(f string) (string, error) {
 	return columnValue, nil
 }
 
-func buildPatchQuery(id uuid.UUID, cs *models.ChangeSet) (string, []interface{}, error) {
+func (r *SCMIntegrationsRepository) buildPatchQuery(id uuid.UUID, cs *models.ChangeSet) (string, []interface{}, error) {
 	columns := []string{}
 	values := []interface{}{}
 
-	cs.RegisterChange("UpdatedAt", time.Now())
+	cs.RegisterChange("UpdatedAt", time.Now().UTC())
 
 	for k, val := range cs.Changes {
 		if k == "CreatedAt" {
 			// this should never be changed
 			continue
 		}
-		colName, err := dbColumnByStructFieldName(k)
+		colName, err := r.dbColumnByStructFieldName(k)
 
 		if err != nil {
 			return "", values, err
@@ -248,13 +200,13 @@ func buildPatchQuery(id uuid.UUID, cs *models.ChangeSet) (string, []interface{},
 
 	return fmt.Sprintf(
 		"UPDATE %s SET %s WHERE id = $%d",
-		PostgresSCMIntegrationsTableName,
+		SCMIntegrationsTableName,
 		strings.Join(columns, ","),
 		(len(values)),
 	), values, nil
 }
 
-func (r *Repository) Patch(id uuid.UUID, cs *models.ChangeSet) (*models.SCMIntegration, error) {
+func (r *SCMIntegrationsRepository) Patch(id uuid.UUID, cs *models.ChangeSet) (*models.SCMIntegration, error) {
 	if cs.IsEmpty() {
 		return r.Find(id)
 	}
@@ -265,7 +217,7 @@ func (r *Repository) Patch(id uuid.UUID, cs *models.ChangeSet) (*models.SCMInteg
 		return nil, err
 	}
 
-	q, args, err := buildPatchQuery(id, cs)
+	q, args, err := r.buildPatchQuery(id, cs)
 
 	if err != nil {
 		return nil, err
@@ -278,15 +230,22 @@ func (r *Repository) Patch(id uuid.UUID, cs *models.ChangeSet) (*models.SCMInteg
 	return r.Find(id)
 }
 
-func (r *Repository) Delete(id uuid.UUID) error {
+func (r *SCMIntegrationsRepository) Delete(id uuid.UUID) error {
 	conn, err := r.cm.GetConnection()
 
 	if err != nil {
 		return err
 	}
 
-	q := fmt.Sprintf("DELETE from %s WHERE id = $1", PostgresSCMIntegrationsTableName)
+	q := fmt.Sprintf("DELETE from %s WHERE id = $1", SCMIntegrationsTableName)
 	_, err = conn.Exec(q, id.String())
 
 	return err
+}
+
+func NewSCMIntegrationsRepository(l zerolog.Logger, cm connManager) *SCMIntegrationsRepository {
+	return &SCMIntegrationsRepository{
+		logger: l,
+		cm:     cm,
+	}
 }

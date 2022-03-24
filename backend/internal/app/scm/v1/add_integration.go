@@ -10,7 +10,6 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/validation"
 )
 
-
 type addIntegrationValidationRepository interface {
 	FindByName(string) (*models.SCMIntegration, error)
 }
@@ -35,8 +34,8 @@ func (dto AddIntegrationDTO) ToModel() *models.SCMIntegration {
 		models.SCMIntegrationType(*dto.Type),
 		*dto.Endpoint,
 		*dto.Token,
-		time.Now(),
-		time.Now(),
+		time.Now().UTC(),
+		time.Now().UTC(),
 	)
 }
 

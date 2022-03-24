@@ -11,14 +11,19 @@ type StructValidator interface {
 }
 
 type Transformer interface {
-	IntegrationV1(m *models.SCMIntegration) *TransformedSCMIntegration
-	IntegrationListV1(m []*models.SCMIntegration) []*TransformedSCMIntegration
+	ProjectV1(m *models.Project) *TransformedProject
+	ProjectListV1(m []*models.Project) []*TransformedProject
 }
 
 type RequiredRepository interface {
-	addIntegrationRepository
-	getIntegrationRepository
-	listIntegrationsRepository
-	updateIntegrationRepository
-	deleteIntegrationRepository
+	addProjectRepo
+	listProjectsRepository
+	getProjectRepository
+	deleteProjectRepository
+	updateProjectRepository
+}
+
+type RequiredIntegrationRepository interface {
+	addProjectIntegrationRepo
+	updateProjectIntegrationRepo
 }

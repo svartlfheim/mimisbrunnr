@@ -9,11 +9,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/svartlfheim/gomigrator"
 	"github.com/svartlfheim/mimisbrunnr/internal/app/api"
+	"github.com/svartlfheim/mimisbrunnr/internal/app/projects"
 	"github.com/svartlfheim/mimisbrunnr/internal/app/scm"
 	"github.com/svartlfheim/mimisbrunnr/internal/config"
 	"github.com/svartlfheim/mimisbrunnr/internal/infra/rdb"
+	"github.com/svartlfheim/mimisbrunnr/internal/infra/rdb/postgres"
 	"github.com/svartlfheim/mimisbrunnr/internal/infra/rdb/schema"
-	scmpostgres "github.com/svartlfheim/mimisbrunnr/internal/infra/rdb/scm/postgres"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/validation"
 )
 
@@ -26,17 +27,22 @@ type DIContainer struct {
 	RdbConnOpener               *rdb.ConnectionOpener
 
 	// scm.*
-	PostgresSCMIntegrationsRepository *scmpostgres.Repository
-	SCMIntegrationsManager            *scm.Controller
+	PostgresSCMIntegrationsRepository *postgres.SCMIntegrationsRepository
+	SCMIntegrationsController         *scm.Controller
 	SCMIntegrationsTransformer        *scm.Transformer
+
+	// projects.*
+	ProjectsController  *projects.Controller
+	ProjectsRepository  *postgres.ProjectsRepository
+	ProjectsTransformer *projects.Transformer
 
 	// schema.*
 	Migrator *gomigrator.Migrator
 
 	// api.*
 	Server                        *api.Server
-	SCMIntegrationsController     *api.SCMHandler
-	ProjectsController            *api.ProjectsHandler
+	SCMIntegrationsHandler        *api.SCMHandler
+	ProjectsAPIHandler            *api.ProjectsHandler
 	ErrorHandlingJsonUnmarshaller *api.ErrorHandlingJsonUnmarshaller
 
 	// validation.*
@@ -187,11 +193,11 @@ func (di *DIContainer) GetRDBConnManagerForMigrations() *rdb.ConnectionManager {
 	return di.RdbConnManagerForMigrations
 }
 
-func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *scmpostgres.Repository {
+func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *postgres.SCMIntegrationsRepository {
 	if di.PostgresSCMIntegrationsRepository == nil {
 		connManager := di.GetRDBConnManager()
 
-		di.PostgresSCMIntegrationsRepository = scmpostgres.NewRepository(di.Logger, connManager)
+		di.PostgresSCMIntegrationsRepository = postgres.NewSCMIntegrationsRepository(di.Logger, connManager)
 	}
 
 	return di.PostgresSCMIntegrationsRepository
@@ -205,9 +211,9 @@ func (di *DIContainer) GetSCMIntegrationsTransformer() *scm.Transformer {
 	return di.SCMIntegrationsTransformer
 }
 
-func (di *DIContainer) GetSCMIntegrationsManager() *scm.Controller {
-	if di.SCMIntegrationsManager == nil {
-		di.SCMIntegrationsManager = scm.NewController(
+func (di *DIContainer) GetSCMIntegrationsController() *scm.Controller {
+	if di.SCMIntegrationsController == nil {
+		di.SCMIntegrationsController = scm.NewController(
 			di.Logger,
 			di.GetPostgresSCMIntegrationsRepository(),
 			di.GetValidator(),
@@ -215,7 +221,39 @@ func (di *DIContainer) GetSCMIntegrationsManager() *scm.Controller {
 		)
 	}
 
-	return di.SCMIntegrationsManager
+	return di.SCMIntegrationsController
+}
+
+func (di *DIContainer) GetPostgresProjectsRepository() *postgres.ProjectsRepository {
+	if di.ProjectsRepository == nil {
+		connManager := di.GetRDBConnManager()
+
+		di.ProjectsRepository = postgres.NewProjectsRepository(di.Logger, connManager)
+	}
+
+	return di.ProjectsRepository
+}
+
+func (di *DIContainer) GetProjectsTransformer() *projects.Transformer {
+	if di.ProjectsTransformer == nil {
+		di.ProjectsTransformer = projects.NewTransformer()
+	}
+
+	return di.ProjectsTransformer
+}
+
+func (di *DIContainer) GetProjectsController() *projects.Controller {
+	if di.ProjectsController == nil {
+		di.ProjectsController = projects.NewController(
+			di.Logger,
+			di.GetPostgresProjectsRepository(),
+			di.GetPostgresSCMIntegrationsRepository(),
+			di.GetValidator(),
+			di.GetProjectsTransformer(),
+		)
+	}
+
+	return di.ProjectsController
 }
 
 func (di *DIContainer) GetErrorHandlingJsonUnmarshaller() *api.ErrorHandlingJsonUnmarshaller {
@@ -226,24 +264,28 @@ func (di *DIContainer) GetErrorHandlingJsonUnmarshaller() *api.ErrorHandlingJson
 	return di.ErrorHandlingJsonUnmarshaller
 }
 
-func (di *DIContainer) GetSCMIntegrationsController() *api.SCMHandler {
-	if di.SCMIntegrationsController == nil {
-		di.SCMIntegrationsController = api.NewSCMIntegrationsController(
+func (di *DIContainer) GetSCMIntegrationsHandler() *api.SCMHandler {
+	if di.SCMIntegrationsHandler == nil {
+		di.SCMIntegrationsHandler = api.NewSCMIntegrationsHandler(
 			di.Logger,
-			di.GetSCMIntegrationsManager(),
+			di.GetSCMIntegrationsController(),
 			di.GetErrorHandlingJsonUnmarshaller(),
 		)
 	}
 
-	return di.SCMIntegrationsController
+	return di.SCMIntegrationsHandler
 }
 
-func (di *DIContainer) GetProjectsController() *api.ProjectsHandler {
-	if di.ProjectsController == nil {
-		di.ProjectsController = api.NewProjectsController()
+func (di *DIContainer) GetProjectsAPIHandler() *api.ProjectsHandler {
+	if di.ProjectsAPIHandler == nil {
+		di.ProjectsAPIHandler = api.NewProjectsHandler(
+			di.Logger,
+			di.GetProjectsController(),
+			di.GetErrorHandlingJsonUnmarshaller(),
+		)
 	}
 
-	return di.ProjectsController
+	return di.ProjectsAPIHandler
 }
 
 func (di *DIContainer) GetServer() *api.Server {
@@ -251,8 +293,8 @@ func (di *DIContainer) GetServer() *api.Server {
 		s := api.NewServer(
 			di.Logger,
 			[]api.Controller{
-				di.GetSCMIntegrationsController(),
-				di.GetProjectsController(),
+				di.GetSCMIntegrationsHandler(),
+				di.GetProjectsAPIHandler(),
 			},
 		)
 

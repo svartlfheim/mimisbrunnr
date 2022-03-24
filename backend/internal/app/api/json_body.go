@@ -7,6 +7,10 @@ import (
 	"reflect"
 )
 
+type jsonUnmarshaller interface {
+	Unmarshal(r *http.Request, into interface{}) error
+}
+
 type ErrorHandlingJsonUnmarshaller struct{}
 
 func (m *ErrorHandlingJsonUnmarshaller) findStructFieldByJsonName(t reflect.Type, name string) (reflect.StructField, error) {

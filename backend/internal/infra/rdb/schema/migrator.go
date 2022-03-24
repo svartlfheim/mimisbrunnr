@@ -41,6 +41,34 @@ CREATE INDEX idx_scm_integrations_type ON scm_integrations(type);`
 				return tx.Exec(dropTable)
 			},
 		},
+		{
+			Id:   "create-projects-table",
+			Name: "create projects table",
+			Execute: func(tx *sqlx.Tx) (sql.Result, error) {
+				createTable := `
+CREATE TABLE projects(
+	id uuid NOT NULL,
+	name TEXT NOT NULL,
+	path TEXT NOT NULL,
+	scm_integration_id uuid NOT NULL,
+	created_at TIMESTAMP WITHOUT TIME ZONE,
+	updated_at TIMESTAMP WITHOUT TIME ZONE,
+	PRIMARY KEY(id),
+	UNIQUE(name),
+	UNIQUE(path, scm_integration_id),
+	CONSTRAINT fk_projects_scm_integration_id FOREIGN KEY(scm_integration_id) REFERENCES scm_integrations(id)
+);
+CREATE INDEX idx_projects_path ON projects(path);
+CREATE INDEX idx_projects_name ON projects(name);`
+
+				return tx.Exec(createTable)
+			},
+			Rollback: func(tx *sqlx.Tx) (sql.Result, error) {
+				dropTable := `DROP TABLE projects;`
+
+				return tx.Exec(dropTable)
+			},
+		},
 	},
 )
 

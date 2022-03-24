@@ -5,10 +5,10 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog"
+	v1 "github.com/svartlfheim/mimisbrunnr/internal/app/scm/v1"
 	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/commandresult"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/validation"
-	v1 "github.com/svartlfheim/mimisbrunnr/internal/app/scm/v1"
 )
 
 type managerRepository interface {

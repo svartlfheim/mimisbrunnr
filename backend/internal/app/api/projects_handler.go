@@ -4,11 +4,27 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog"
+	v1 "github.com/svartlfheim/mimisbrunnr/internal/app/projects/v1"
+	"github.com/svartlfheim/mimisbrunnr/internal/pkg/commandresult"
 )
 
-type ProjectsHandler struct{}
+type ProjectsController interface {
+	AddV1(dto v1.AddProjectDTO) commandresult.Result
+	ListV1(dto v1.ListProjectsDTO) commandresult.Result
+	GetV1(id string) commandresult.Result
+	UpdateV1(id string, dto v1.UpdateProjectDTO) commandresult.Result
+	DeleteV1(id string) commandresult.Result
+}
+
+type ProjectsHandler struct {
+	logger           zerolog.Logger
+	controller       ProjectsController
+	jsonUnmarshaller jsonUnmarshaller
+}
 
 func projectContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +54,7 @@ func (c *ProjectsHandler) Routes() http.Handler {
 	r.Route("/{projectID}", func(r chi.Router) {
 		r.Use(projectContext)
 		r.Get("/", c.Get)
-		r.Put("/", c.Update)
+		r.Patch("/", c.Update)
 		r.Delete("/", c.Delete)
 
 		r.Route("/pages", func(r chi.Router) {
@@ -60,33 +76,78 @@ func (c *ProjectsHandler) RouteGroup() string {
 }
 
 func (c *ProjectsHandler) List(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("list projects")); err != nil {
-		panic(err)
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
+
+	dto := v1.ListProjectsDTO{}
+
+	if page != "" {
+		if pageAsInt, err := strconv.Atoi(page); err == nil {
+			dto.Page = &pageAsInt
+		}
 	}
+
+	if limit != "" {
+		if limitAsInt, err := strconv.Atoi(limit); err == nil {
+			dto.Limit = &limitAsInt
+		}
+	}
+
+	serveResponseForResult(
+		c.controller.ListV1(dto),
+		c.logger,
+		w,
+	)
 }
 
 func (c *ProjectsHandler) Create(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("create project")); err != nil {
-		panic(err)
+	dto := v1.AddProjectDTO{}
+
+	if err := c.jsonUnmarshaller.Unmarshal(r, &dto); handleError(w, c.logger, err) {
+		return
 	}
+
+	serveResponseForResult(
+		c.controller.AddV1(dto),
+		c.logger,
+		w,
+	)
 }
 
 func (c *ProjectsHandler) Get(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("get project: " + r.Context().Value(projectIDContextKey).(string))); err != nil {
-		panic(err)
-	}
+	id := r.Context().Value(projectIDContextKey).(string)
+
+	serveResponseForResult(
+		c.controller.GetV1(id),
+		c.logger,
+		w,
+	)
 }
 
 func (c *ProjectsHandler) Update(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("update project: " + r.Context().Value(projectIDContextKey).(string))); err != nil {
-		panic(err)
+	id := r.Context().Value(projectIDContextKey).(string)
+
+	dto := v1.UpdateProjectDTO{}
+
+	if err := c.jsonUnmarshaller.Unmarshal(r, &dto); handleError(w, c.logger, err) {
+		return
 	}
+
+	serveResponseForResult(
+		c.controller.UpdateV1(id, dto),
+		c.logger,
+		w,
+	)
 }
 
 func (c *ProjectsHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("delete project: " + r.Context().Value(projectIDContextKey).(string))); err != nil {
-		panic(err)
-	}
+	id := r.Context().Value(projectIDContextKey).(string)
+
+	serveResponseForResult(
+		c.controller.DeleteV1(id),
+		c.logger,
+		w,
+	)
 }
 
 func (c *ProjectsHandler) GetPage(w http.ResponseWriter, r *http.Request) {
@@ -125,6 +186,10 @@ func (c *ProjectsHandler) ListPages(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func NewProjectsController() *ProjectsHandler {
-	return &ProjectsHandler{}
+func NewProjectsHandler(l zerolog.Logger, c ProjectsController, jU jsonUnmarshaller) *ProjectsHandler {
+	return &ProjectsHandler{
+		logger:           l,
+		controller:       c,
+		jsonUnmarshaller: jU,
+	}
 }

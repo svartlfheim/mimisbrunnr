@@ -17,7 +17,9 @@ const requiredRule Rule = "required"
 const greaterThanRule Rule = "gt"
 const lessThanRule Rule = "lt"
 const uniqueRule Rule = "unique"
+const uniquePerOtherFieldRule Rule = "uniqueperotherfield"
 const lessThanOrEqualToRule Rule = "lte"
+const existsRule Rule = "exists"
 
 type MessageGenerator func(Error) string
 type ParameterParser func(Error) map[string]string
@@ -71,6 +73,17 @@ var messagesForRule map[Rule]MessageGenerator = map[Rule]MessageGenerator{
 			return "must be larger"
 		}
 	},
+
+	existsRule: func(ve Error) string {
+		return "must already exist"
+	},
+
+	uniquePerOtherFieldRule: func(ve Error) string {
+		// Parameters func will panic if it wasn't found
+		field := ve.Parameters()["field"]
+
+		return fmt.Sprintf("value must be unique across all records of this type with the same value for: %s", field)
+	},
 }
 
 var parameterParsers map[Rule]ParameterParser = map[Rule]ParameterParser{
@@ -87,6 +100,16 @@ var parameterParsers map[Rule]ParameterParser = map[Rule]ParameterParser{
 	lessThanOrEqualToRule: func(ve Error) map[string]string {
 		return map[string]string{
 			"limit": ve.param,
+		}
+	},
+
+	uniquePerOtherFieldRule: func(ve Error) map[string]string {
+		if ve.param == "" {
+			panic(fmt.Errorf("invalid %s rule config, no field defined", string(uniquePerOtherFieldRule)))
+		}
+
+		return map[string]string{
+			"field": ve.param,
 		}
 	},
 }

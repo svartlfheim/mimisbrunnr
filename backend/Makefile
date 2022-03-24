@@ -35,7 +35,7 @@ gen-cmd-mocks:
 .PHONY: gen-internal-infra-mocks
 gen-internal-infra-mocks:
 	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb --outpkg rdbmocks --dir ./internal/infra/rdb --name connectionOpener
-	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb/scm/postgres --outpkg scmpostgresmocks --dir ./internal/infra/rdb/scm/postgres --name connManager
+	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb/postgres --outpkg postgresmocks --dir ./internal/infra/rdb/postgres --name connManager
 	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb/schema --outpkg schema --dir ./internal/infra/rdb/schema --name connectionManager
 	mockery --case underscore --with-expecter --exported --output $(MOCKS_DIR)/infra/rdb/schema --outpkg schema --dir ./internal/infra/rdb/schema --name hasSchema
 

@@ -3,8 +3,8 @@ package scm
 import (
 	"time"
 
-	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	v1 "github.com/svartlfheim/mimisbrunnr/internal/app/scm/v1"
+	"github.com/svartlfheim/mimisbrunnr/internal/models"
 )
 
 type Transformer struct{}

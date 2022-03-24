@@ -11,10 +11,6 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/commandresult"
 )
 
-type jsonUnmarshaller interface {
-	Unmarshal(r *http.Request, into interface{}) error
-}
-
 type SCMIntegrationsController interface {
 	AddV1(dto v1.AddIntegrationDTO) commandresult.Result
 	GetV1(id string) commandresult.Result
@@ -133,10 +129,10 @@ func (c *SCMHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func NewSCMIntegrationsController(l zerolog.Logger, m SCMIntegrationsController, jU jsonUnmarshaller) *SCMHandler {
+func NewSCMIntegrationsHandler(l zerolog.Logger, m SCMIntegrationsController, jU jsonUnmarshaller) *SCMHandler {
 	return &SCMHandler{
 		logger:           l,
-		controller:          m,
+		controller:       m,
 		jsonUnmarshaller: jU,
 	}
 }

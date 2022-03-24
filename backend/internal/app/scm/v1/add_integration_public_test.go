@@ -13,7 +13,6 @@ import (
 	"github.com/svartlfheim/mimisbrunnr/test/pointto"
 )
 
-
 func Test_validation_for_add_scm_integration_v1(t *testing.T) {
 	tests := []struct {
 		name      string
