@@ -11,43 +11,39 @@ type getProjectRepository interface {
 	Find(uuid.UUID) (*models.Project, error)
 }
 
-type getProjectV1Response struct {
-	found  *TransformedProject
+type getProjectResponse struct {
+	found  *models.Project
 	errors []error
 	status commandresult.Status
 }
 
-func (r *getProjectV1Response) Data() interface{} {
+func (r *getProjectResponse) Data() interface{} {
 	return r.found
 }
 
-func (r *getProjectV1Response) Meta() interface{} {
+func (r *getProjectResponse) Meta() interface{} {
 	return map[string]interface{}{}
 }
 
-func (r *getProjectV1Response) Errors() []error {
+func (r *getProjectResponse) Errors() []error {
 	return r.errors
 }
 
-func (r *getProjectV1Response) ValidationErrors() []validation.ValidationError {
+func (r *getProjectResponse) ValidationErrors() []validation.ValidationError {
 	// There will never be validation errors here
 	// Only a bad request or not found
 	return []validation.ValidationError{}
 }
 
-func (r *getProjectV1Response) Status() commandresult.Status {
+func (r *getProjectResponse) Status() commandresult.Status {
 	return r.status
 }
 
-func (r *getProjectV1Response) IsListData() bool {
-	return false
-}
-
-func Get(repo getProjectRepository, t Transformer, id string) commandresult.Result {
+func Get(repo getProjectRepository, id string) commandresult.Result {
 	uuid, err := uuid.Parse(id)
 
 	if err != nil {
-		return &getProjectV1Response{
+		return &getProjectResponse{
 			status: commandresult.NotFound,
 		}
 	}
@@ -55,7 +51,7 @@ func Get(repo getProjectRepository, t Transformer, id string) commandresult.Resu
 	m, err := repo.Find(uuid)
 
 	if err != nil {
-		return &getProjectV1Response{
+		return &getProjectResponse{
 			errors: []error{
 				err,
 			},
@@ -64,13 +60,13 @@ func Get(repo getProjectRepository, t Transformer, id string) commandresult.Resu
 	}
 
 	if m == nil {
-		return &getProjectV1Response{
+		return &getProjectResponse{
 			status: commandresult.NotFound,
 		}
 	}
 
-	return &getProjectV1Response{
+	return &getProjectResponse{
 		status: commandresult.Okay,
-		found:  t.ProjectV1(m),
+		found:  m,
 	}
 }

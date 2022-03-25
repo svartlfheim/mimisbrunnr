@@ -23,8 +23,8 @@ type ListProjectsDTO struct {
 	Limit *int `validate:"omitempty,gt=0,lte=100" json:"limit"`
 }
 
-type listProjectsV1Response struct {
-	found            []*TransformedProject
+type listProjectsResponse struct {
+	found            []*models.Project
 	errors           []error
 	status           commandresult.Status
 	validationErrors []validation.ValidationError
@@ -33,11 +33,11 @@ type listProjectsV1Response struct {
 	total            int
 }
 
-func (r *listProjectsV1Response) Data() interface{} {
+func (r *listProjectsResponse) Data() interface{} {
 	return r.found
 }
 
-func (r *listProjectsV1Response) Meta() interface{} {
+func (r *listProjectsResponse) Meta() interface{} {
 	if !r.status.Equals(commandresult.Okay) {
 		// Return no meta if the request was no okay
 		// The values will likely be empty
@@ -54,29 +54,25 @@ func (r *listProjectsV1Response) Meta() interface{} {
 	}
 }
 
-func (r *listProjectsV1Response) Errors() []error {
+func (r *listProjectsResponse) Errors() []error {
 	return r.errors
 }
 
-func (r *listProjectsV1Response) ValidationErrors() []validation.ValidationError {
+func (r *listProjectsResponse) ValidationErrors() []validation.ValidationError {
 	// There will never be validation errors here
 	// Only a bad request or not found
 	return r.validationErrors
 }
 
-func (r *listProjectsV1Response) Status() commandresult.Status {
+func (r *listProjectsResponse) Status() commandresult.Status {
 	return r.status
 }
 
-func (r *listProjectsV1Response) IsListData() bool {
-	return true
-}
-
-func List(repo listProjectsRepository, v StructValidator, t Transformer, dto ListProjectsDTO) commandresult.Result {
+func List(repo listProjectsRepository, v StructValidator, dto ListProjectsDTO) commandresult.Result {
 	validationErrors, err := v.ValidateStruct(dto)
 
 	if err != nil {
-		return &listProjectsV1Response{
+		return &listProjectsResponse{
 			errors: []error{
 				err,
 			},
@@ -85,7 +81,7 @@ func List(repo listProjectsRepository, v StructValidator, t Transformer, dto Lis
 	}
 
 	if len(validationErrors) > 0 {
-		return &listProjectsV1Response{
+		return &listProjectsResponse{
 			status:           commandresult.Invalid,
 			validationErrors: validationErrors,
 		}
@@ -94,7 +90,7 @@ func List(repo listProjectsRepository, v StructValidator, t Transformer, dto Lis
 	total, err := repo.Count()
 
 	if err != nil {
-		return &listProjectsV1Response{
+		return &listProjectsResponse{
 			errors: []error{
 				err,
 			},
@@ -118,7 +114,7 @@ func List(repo listProjectsRepository, v StructValidator, t Transformer, dto Lis
 	numPages := int(math.Ceil(float64(total) / float64(resultLimit)))
 
 	if page != 1 && page > numPages {
-		return &listProjectsV1Response{
+		return &listProjectsResponse{
 			errors: []error{
 				errors.New("page out of bounds"),
 			},
@@ -129,7 +125,7 @@ func List(repo listProjectsRepository, v StructValidator, t Transformer, dto Lis
 	list, err := repo.Paginate(page, resultLimit)
 
 	if err != nil {
-		return &listProjectsV1Response{
+		return &listProjectsResponse{
 			errors: []error{
 				err,
 			},
@@ -137,9 +133,9 @@ func List(repo listProjectsRepository, v StructValidator, t Transformer, dto Lis
 		}
 	}
 
-	return &listProjectsV1Response{
+	return &listProjectsResponse{
 		status: commandresult.Okay,
-		found:  t.ProjectListV1(list),
+		found:  list,
 		page:   page,
 		limit:  resultLimit,
 		total:  total,

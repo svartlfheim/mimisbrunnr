@@ -11,43 +11,39 @@ type getIntegrationRepository interface {
 	Find(uuid.UUID) (*models.SCMIntegration, error)
 }
 
-type getIntegrationV1Response struct {
-	found  *TransformedSCMIntegration
+type getIntegrationResponse struct {
+	found  *models.SCMIntegration
 	errors []error
 	status commandresult.Status
 }
 
-func (r *getIntegrationV1Response) Data() interface{} {
+func (r *getIntegrationResponse) Data() interface{} {
 	return r.found
 }
 
-func (r *getIntegrationV1Response) Meta() interface{} {
+func (r *getIntegrationResponse) Meta() interface{} {
 	return map[string]interface{}{}
 }
 
-func (r *getIntegrationV1Response) Errors() []error {
+func (r *getIntegrationResponse) Errors() []error {
 	return r.errors
 }
 
-func (r *getIntegrationV1Response) ValidationErrors() []validation.ValidationError {
+func (r *getIntegrationResponse) ValidationErrors() []validation.ValidationError {
 	// There will never be validation errors here
 	// Only a bad request or not found
 	return []validation.ValidationError{}
 }
 
-func (r *getIntegrationV1Response) Status() commandresult.Status {
+func (r *getIntegrationResponse) Status() commandresult.Status {
 	return r.status
 }
 
-func (r *getIntegrationV1Response) IsListData() bool {
-	return false
-}
-
-func Get(repo getIntegrationRepository, t Transformer, id string) commandresult.Result {
+func Get(repo getIntegrationRepository, id string) commandresult.Result {
 	uuid, err := uuid.Parse(id)
 
 	if err != nil {
-		return &getIntegrationV1Response{
+		return &getIntegrationResponse{
 			status: commandresult.NotFound,
 		}
 	}
@@ -55,7 +51,7 @@ func Get(repo getIntegrationRepository, t Transformer, id string) commandresult.
 	m, err := repo.Find(uuid)
 
 	if err != nil {
-		return &getIntegrationV1Response{
+		return &getIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -64,13 +60,13 @@ func Get(repo getIntegrationRepository, t Transformer, id string) commandresult.
 	}
 
 	if m == nil {
-		return &getIntegrationV1Response{
+		return &getIntegrationResponse{
 			status: commandresult.NotFound,
 		}
 	}
 
-	return &getIntegrationV1Response{
+	return &getIntegrationResponse{
 		status: commandresult.Okay,
-		found:  t.IntegrationV1(m),
+		found:  m,
 	}
 }

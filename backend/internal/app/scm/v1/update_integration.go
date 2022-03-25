@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/svartlfheim/mimisbrunnr/internal/app/scm/rules"
 	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/commandresult"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/validation"
@@ -48,40 +48,19 @@ func (dto UpdateIntegrationDTO) ToChangeSet(current *models.SCMIntegration) *mod
 	return cs
 }
 
-func (dto UpdateIntegrationDTO) Validate(v StructValidator, repo updateIntegrationValidationRepository, existing *models.SCMIntegration) ([]validation.ValidationError, error) {
-	return v.ValidateStruct(dto, func(v *validator.Validate) *validator.Validate {
-		err := v.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
-			m, err := repo.FindByName(fl.Field().String())
-
-			if err != nil {
-				panic(err)
-			}
-
-			return m == nil ||
-				// Can reuse it's own name again, if it was included in dto
-				m.ID.String() == existing.ID.String()
-		})
-
-		if err != nil {
-			panic(err)
-		}
-		return v
-	})
-}
-
-type updateIntegrationV1Response struct {
-	updated          *TransformedSCMIntegration
+type updateIntegrationResponse struct {
+	updated          *models.SCMIntegration
 	errors           []error
 	status           commandresult.Status
 	validationErrors []validation.ValidationError
 	changeset        *models.ChangeSet
 }
 
-func (r *updateIntegrationV1Response) Data() interface{} {
+func (r *updateIntegrationResponse) Data() interface{} {
 	return r.updated
 }
 
-func (r *updateIntegrationV1Response) Meta() interface{} {
+func (r *updateIntegrationResponse) Meta() interface{} {
 	modifiedFields := []string{}
 
 	if r.changeset != nil {
@@ -95,27 +74,23 @@ func (r *updateIntegrationV1Response) Meta() interface{} {
 	}
 }
 
-func (r *updateIntegrationV1Response) Errors() []error {
+func (r *updateIntegrationResponse) Errors() []error {
 	return r.errors
 }
 
-func (r *updateIntegrationV1Response) ValidationErrors() []validation.ValidationError {
+func (r *updateIntegrationResponse) ValidationErrors() []validation.ValidationError {
 	return r.validationErrors
 }
 
-func (r *updateIntegrationV1Response) Status() commandresult.Status {
+func (r *updateIntegrationResponse) Status() commandresult.Status {
 	return r.status
 }
 
-func (r *updateIntegrationV1Response) IsListData() bool {
-	return false
-}
-
-func Update(repo updateIntegrationRepository, v StructValidator, t Transformer, id string, dto UpdateIntegrationDTO) commandresult.Result {
+func Update(repo updateIntegrationRepository, v StructValidator, id string, dto UpdateIntegrationDTO) commandresult.Result {
 	uuid, err := uuid.Parse(id)
 
 	if err != nil {
-		return &updateIntegrationV1Response{
+		return &updateIntegrationResponse{
 			status: commandresult.NotFound,
 		}
 	}
@@ -123,7 +98,7 @@ func Update(repo updateIntegrationRepository, v StructValidator, t Transformer, 
 	existing, err := repo.Find(uuid)
 
 	if err != nil {
-		return &updateIntegrationV1Response{
+		return &updateIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -133,16 +108,16 @@ func Update(repo updateIntegrationRepository, v StructValidator, t Transformer, 
 
 	if existing == nil {
 		if err != nil {
-			return &updateIntegrationV1Response{
+			return &updateIntegrationResponse{
 				status: commandresult.NotFound,
 			}
 		}
 	}
 
-	validationErrors, err := dto.Validate(v, repo, existing)
+	validationErrors, err := v.ValidateStruct(dto, rules.Unique(repo, existing))
 
 	if err != nil {
-		return &updateIntegrationV1Response{
+		return &updateIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -151,7 +126,7 @@ func Update(repo updateIntegrationRepository, v StructValidator, t Transformer, 
 	}
 
 	if len(validationErrors) > 0 {
-		return &updateIntegrationV1Response{
+		return &updateIntegrationResponse{
 			status:           commandresult.Invalid,
 			validationErrors: validationErrors,
 		}
@@ -160,16 +135,16 @@ func Update(repo updateIntegrationRepository, v StructValidator, t Transformer, 
 	cs := dto.ToChangeSet(existing)
 
 	if cs.IsEmpty() {
-		return &updateIntegrationV1Response{
+		return &updateIntegrationResponse{
 			status:  commandresult.Okay,
-			updated: t.IntegrationV1(existing),
+			updated: existing,
 		}
 	}
 
 	updated, err := repo.Patch(uuid, cs)
 
 	if err != nil {
-		return &updateIntegrationV1Response{
+		return &updateIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -177,9 +152,9 @@ func Update(repo updateIntegrationRepository, v StructValidator, t Transformer, 
 		}
 	}
 
-	return &updateIntegrationV1Response{
+	return &updateIntegrationResponse{
 		status:    commandresult.Okay,
-		updated:   t.IntegrationV1(updated),
+		updated:   updated,
 		changeset: cs,
 	}
 }

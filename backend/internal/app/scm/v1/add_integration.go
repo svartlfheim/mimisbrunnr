@@ -3,8 +3,8 @@ package v1
 import (
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/svartlfheim/mimisbrunnr/internal/app/scm/rules"
 	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/commandresult"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/validation"
@@ -39,62 +39,38 @@ func (dto AddIntegrationDTO) ToModel() *models.SCMIntegration {
 	)
 }
 
-func (dto AddIntegrationDTO) Validate(v StructValidator, repo addIntegrationValidationRepository) ([]validation.ValidationError, error) {
-	return v.ValidateStruct(dto, func(v *validator.Validate) *validator.Validate {
-		err := v.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
-			m, err := repo.FindByName(fl.Field().String())
-
-			if err != nil {
-				panic(err)
-			}
-
-			return m == nil
-		})
-
-		if err != nil {
-			panic(err)
-		}
-
-		return v
-	})
-}
-
-type addIntegrationV1Response struct {
-	created          *TransformedSCMIntegration
+type addIntegrationResponse struct {
+	created          *models.SCMIntegration
 	errors           []error
 	status           commandresult.Status
 	validationErrors []validation.ValidationError
 }
 
-func (r *addIntegrationV1Response) Data() interface{} {
+func (r *addIntegrationResponse) Data() interface{} {
 	return r.created
 }
 
-func (r *addIntegrationV1Response) Meta() interface{} {
+func (r *addIntegrationResponse) Meta() interface{} {
 	return map[string]interface{}{}
 }
 
-func (r *addIntegrationV1Response) Errors() []error {
+func (r *addIntegrationResponse) Errors() []error {
 	return r.errors
 }
 
-func (r *addIntegrationV1Response) ValidationErrors() []validation.ValidationError {
+func (r *addIntegrationResponse) ValidationErrors() []validation.ValidationError {
 	return r.validationErrors
 }
 
-func (r *addIntegrationV1Response) Status() commandresult.Status {
+func (r *addIntegrationResponse) Status() commandresult.Status {
 	return r.status
 }
 
-func (r *addIntegrationV1Response) IsListData() bool {
-	return false
-}
-
-func Add(repo addIntegrationRepository, v StructValidator, t Transformer, dto AddIntegrationDTO) commandresult.Result {
-	validationErrors, err := dto.Validate(v, repo)
+func Add(repo addIntegrationRepository, v StructValidator, dto AddIntegrationDTO) commandresult.Result {
+	validationErrors, err := v.ValidateStruct(dto, rules.Unique(repo, nil))
 
 	if err != nil {
-		return &addIntegrationV1Response{
+		return &addIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -103,7 +79,7 @@ func Add(repo addIntegrationRepository, v StructValidator, t Transformer, dto Ad
 	}
 
 	if len(validationErrors) > 0 {
-		return &addIntegrationV1Response{
+		return &addIntegrationResponse{
 			status:           commandresult.Invalid,
 			validationErrors: validationErrors,
 		}
@@ -112,7 +88,7 @@ func Add(repo addIntegrationRepository, v StructValidator, t Transformer, dto Ad
 	m := dto.ToModel()
 
 	if err := repo.Create(m); err != nil {
-		return &addIntegrationV1Response{
+		return &addIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -120,8 +96,8 @@ func Add(repo addIntegrationRepository, v StructValidator, t Transformer, dto Ad
 		}
 	}
 
-	return &addIntegrationV1Response{
+	return &addIntegrationResponse{
 		status:  commandresult.Created,
-		created: t.IntegrationV1(m),
+		created: m,
 	}
 }

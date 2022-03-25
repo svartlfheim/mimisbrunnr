@@ -20,6 +20,7 @@ const uniqueRule Rule = "unique"
 const uniquePerOtherFieldRule Rule = "uniqueperotherfield"
 const lessThanOrEqualToRule Rule = "lte"
 const existsRule Rule = "exists"
+const uuidRule Rule = "uuid"
 
 type MessageGenerator func(Error) string
 type ParameterParser func(Error) map[string]string
@@ -30,6 +31,10 @@ var messagesForRule map[Rule]MessageGenerator = map[Rule]MessageGenerator{
 	},
 	uniqueRule: func(ve Error) string {
 		return "value must be unique across all records of this type"
+	},
+
+	uuidRule: func(ve Error) string {
+		return "must be a value uuid"
 	},
 
 	lessThanOrEqualToRule: func(ve Error) string {

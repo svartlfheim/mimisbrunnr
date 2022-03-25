@@ -15,10 +15,6 @@ type managerRepository interface {
 	v1.RequiredRepository
 }
 
-type managerTransformer interface {
-	v1.Transformer
-}
-
 type structValidator interface {
 	v1.StructValidator
 }
@@ -27,27 +23,26 @@ type Controller struct {
 	logger      zerolog.Logger
 	repo        managerRepository
 	validator   structValidator
-	transformer managerTransformer
 }
 
 func (m *Controller) AddV1(dto v1.AddIntegrationDTO) commandresult.Result {
-	return v1.Add(m.repo, m.validator, m.transformer, dto)
+	return v1.Add(m.repo, m.validator, dto)
 }
 
 func (m *Controller) GetV1(id string) commandresult.Result {
-	return v1.Get(m.repo, m.transformer, id)
+	return v1.Get(m.repo, id)
 }
 
 func (m *Controller) ListV1(dto v1.ListIntegrationsDTO) commandresult.Result {
-	return v1.List(m.repo, m.validator, m.transformer, dto)
+	return v1.List(m.repo, m.validator, dto)
 }
 
 func (m *Controller) UpdateV1(id string, dto v1.UpdateIntegrationDTO) commandresult.Result {
-	return v1.Update(m.repo, m.validator, m.transformer, id, dto)
+	return v1.Update(m.repo, m.validator, id, dto)
 }
 
 func (m *Controller) DeleteV1(id string) commandresult.Result {
-	return v1.Delete(m.repo, m.transformer, id)
+	return v1.Delete(m.repo, id)
 }
 
 func RegisterExtraValidations(v structValidator) {
@@ -84,13 +79,12 @@ func RegisterExtraValidations(v structValidator) {
 	})
 }
 
-func NewController(l zerolog.Logger, repo managerRepository, v structValidator, t managerTransformer) *Controller {
+func NewController(l zerolog.Logger, repo managerRepository, v structValidator) *Controller {
 	RegisterExtraValidations(v)
 
 	return &Controller{
 		logger:      l,
 		repo:        repo,
 		validator:   v,
-		transformer: t,
 	}
 }

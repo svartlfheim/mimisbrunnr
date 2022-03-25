@@ -35,3 +35,20 @@ type ErrEmptyRequestBodyNotAllowed struct{}
 func (e ErrEmptyRequestBodyNotAllowed) Error() string {
 	return "request body cannot be empty"
 }
+
+type ErrUnsupportedApiVersion struct {
+	Version int
+}
+
+func (e ErrUnsupportedApiVersion) Error() string {
+	return fmt.Sprintf("version %d is not supported", e.Version)
+}
+
+type ErrUnsupportedResourceType struct {
+	Val interface{}
+}
+
+func (e ErrUnsupportedResourceType) Error() string {
+	rtype := reflect.TypeOf(e.Val)
+	return fmt.Sprintf("type %s is not supported", rtype)
+}

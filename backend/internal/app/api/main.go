@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,7 +31,11 @@ type Server struct {
 // Add the apiVersion to request context
 func apiContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		apiVersion := chi.URLParam(r, "apiVersion")
+		apiVersion, err := strconv.Atoi(chi.URLParam(r, "apiVersion"))
+
+		if err != nil {
+			panic(err)
+		}
 
 		ctx := context.WithValue(r.Context(), apiVersionContextKey, apiVersion)
 		next.ServeHTTP(w, r.WithContext(ctx))

@@ -12,42 +12,38 @@ type deleteProjectRepository interface {
 	Find(uuid.UUID) (*models.Project, error)
 }
 
-type deleteProjectV1Response struct {
-	deleted *TransformedProject
+type deleteProjectResponse struct {
+	deleted *models.Project
 	errors  []error
 	status  commandresult.Status
 }
 
-func (r *deleteProjectV1Response) Data() interface{} {
+func (r *deleteProjectResponse) Data() interface{} {
 	return r.deleted
 }
 
-func (r *deleteProjectV1Response) Meta() interface{} {
+func (r *deleteProjectResponse) Meta() interface{} {
 
 	return map[string]interface{}{}
 }
 
-func (r *deleteProjectV1Response) Errors() []error {
+func (r *deleteProjectResponse) Errors() []error {
 	return r.errors
 }
 
-func (r *deleteProjectV1Response) ValidationErrors() []validation.ValidationError {
+func (r *deleteProjectResponse) ValidationErrors() []validation.ValidationError {
 	return []validation.ValidationError{}
 }
 
-func (r *deleteProjectV1Response) Status() commandresult.Status {
+func (r *deleteProjectResponse) Status() commandresult.Status {
 	return r.status
 }
 
-func (r *deleteProjectV1Response) IsListData() bool {
-	return false
-}
-
-func Delete(repo deleteProjectRepository, t Transformer, id string) commandresult.Result {
+func Delete(repo deleteProjectRepository, id string) commandresult.Result {
 	uuid, err := uuid.Parse(id)
 
 	if err != nil {
-		return &deleteProjectV1Response{
+		return &deleteProjectResponse{
 			status: commandresult.NotFound,
 		}
 	}
@@ -55,7 +51,7 @@ func Delete(repo deleteProjectRepository, t Transformer, id string) commandresul
 	existing, err := repo.Find(uuid)
 
 	if err != nil {
-		return &deleteProjectV1Response{
+		return &deleteProjectResponse{
 			errors: []error{
 				err,
 			},
@@ -64,7 +60,7 @@ func Delete(repo deleteProjectRepository, t Transformer, id string) commandresul
 	}
 
 	if existing == nil {
-		return &deleteProjectV1Response{
+		return &deleteProjectResponse{
 			status: commandresult.NotFound,
 		}
 	}
@@ -72,7 +68,7 @@ func Delete(repo deleteProjectRepository, t Transformer, id string) commandresul
 	err = repo.Delete(uuid)
 
 	if err != nil {
-		return &deleteProjectV1Response{
+		return &deleteProjectResponse{
 			errors: []error{
 				err,
 			},
@@ -80,8 +76,8 @@ func Delete(repo deleteProjectRepository, t Transformer, id string) commandresul
 		}
 	}
 
-	return &deleteProjectV1Response{
+	return &deleteProjectResponse{
 		status:  commandresult.Okay,
-		deleted: t.ProjectV1(existing),
+		deleted: existing,
 	}
 }

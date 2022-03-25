@@ -12,42 +12,38 @@ type deleteIntegrationRepository interface {
 	Find(uuid.UUID) (*models.SCMIntegration, error)
 }
 
-type deleteIntegrationV1Response struct {
-	deleted *TransformedSCMIntegration
+type deleteIntegrationResponse struct {
+	deleted *models.SCMIntegration
 	errors  []error
 	status  commandresult.Status
 }
 
-func (r *deleteIntegrationV1Response) Data() interface{} {
+func (r *deleteIntegrationResponse) Data() interface{} {
 	return r.deleted
 }
 
-func (r *deleteIntegrationV1Response) Meta() interface{} {
+func (r *deleteIntegrationResponse) Meta() interface{} {
 
 	return map[string]interface{}{}
 }
 
-func (r *deleteIntegrationV1Response) Errors() []error {
+func (r *deleteIntegrationResponse) Errors() []error {
 	return r.errors
 }
 
-func (r *deleteIntegrationV1Response) ValidationErrors() []validation.ValidationError {
+func (r *deleteIntegrationResponse) ValidationErrors() []validation.ValidationError {
 	return []validation.ValidationError{}
 }
 
-func (r *deleteIntegrationV1Response) Status() commandresult.Status {
+func (r *deleteIntegrationResponse) Status() commandresult.Status {
 	return r.status
 }
 
-func (r *deleteIntegrationV1Response) IsListData() bool {
-	return false
-}
-
-func Delete(repo deleteIntegrationRepository, t Transformer, id string) commandresult.Result {
+func Delete(repo deleteIntegrationRepository, id string) commandresult.Result {
 	uuid, err := uuid.Parse(id)
 
 	if err != nil {
-		return &deleteIntegrationV1Response{
+		return &deleteIntegrationResponse{
 			status: commandresult.NotFound,
 		}
 	}
@@ -55,7 +51,7 @@ func Delete(repo deleteIntegrationRepository, t Transformer, id string) commandr
 	existing, err := repo.Find(uuid)
 
 	if err != nil {
-		return &deleteIntegrationV1Response{
+		return &deleteIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -64,7 +60,7 @@ func Delete(repo deleteIntegrationRepository, t Transformer, id string) commandr
 	}
 
 	if existing == nil {
-		return &deleteIntegrationV1Response{
+		return &deleteIntegrationResponse{
 			status: commandresult.NotFound,
 		}
 	}
@@ -72,7 +68,7 @@ func Delete(repo deleteIntegrationRepository, t Transformer, id string) commandr
 	err = repo.Delete(uuid)
 
 	if err != nil {
-		return &deleteIntegrationV1Response{
+		return &deleteIntegrationResponse{
 			errors: []error{
 				err,
 			},
@@ -80,8 +76,8 @@ func Delete(repo deleteIntegrationRepository, t Transformer, id string) commandr
 		}
 	}
 
-	return &deleteIntegrationV1Response{
+	return &deleteIntegrationResponse{
 		status:  commandresult.Okay,
-		deleted: t.IntegrationV1(existing),
+		deleted: existing,
 	}
 }

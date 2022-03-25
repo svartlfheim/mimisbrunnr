@@ -29,12 +29,10 @@ type DIContainer struct {
 	// scm.*
 	PostgresSCMIntegrationsRepository *postgres.SCMIntegrationsRepository
 	SCMIntegrationsController         *scm.Controller
-	SCMIntegrationsTransformer        *scm.Transformer
 
 	// projects.*
 	ProjectsController  *projects.Controller
 	ProjectsRepository  *postgres.ProjectsRepository
-	ProjectsTransformer *projects.Transformer
 
 	// schema.*
 	Migrator *gomigrator.Migrator
@@ -43,10 +41,9 @@ type DIContainer struct {
 	Server                        *api.Server
 	SCMIntegrationsHandler        *api.SCMHandler
 	ProjectsAPIHandler            *api.ProjectsHandler
+	APITransformer                *api.Transformer
+	APIResponseBuilder *api.ResponseBuilder
 	ErrorHandlingJsonUnmarshaller *api.ErrorHandlingJsonUnmarshaller
-
-	// validation.*
-	Validator *validation.Validator
 
 	// External dependencies
 	Logger zerolog.Logger
@@ -203,21 +200,12 @@ func (di *DIContainer) GetPostgresSCMIntegrationsRepository() *postgres.SCMInteg
 	return di.PostgresSCMIntegrationsRepository
 }
 
-func (di *DIContainer) GetSCMIntegrationsTransformer() *scm.Transformer {
-	if di.SCMIntegrationsTransformer == nil {
-		di.SCMIntegrationsTransformer = scm.NewTransformer()
-	}
-
-	return di.SCMIntegrationsTransformer
-}
-
 func (di *DIContainer) GetSCMIntegrationsController() *scm.Controller {
 	if di.SCMIntegrationsController == nil {
 		di.SCMIntegrationsController = scm.NewController(
 			di.Logger,
 			di.GetPostgresSCMIntegrationsRepository(),
 			di.GetValidator(),
-			di.GetSCMIntegrationsTransformer(),
 		)
 	}
 
@@ -234,14 +222,6 @@ func (di *DIContainer) GetPostgresProjectsRepository() *postgres.ProjectsReposit
 	return di.ProjectsRepository
 }
 
-func (di *DIContainer) GetProjectsTransformer() *projects.Transformer {
-	if di.ProjectsTransformer == nil {
-		di.ProjectsTransformer = projects.NewTransformer()
-	}
-
-	return di.ProjectsTransformer
-}
-
 func (di *DIContainer) GetProjectsController() *projects.Controller {
 	if di.ProjectsController == nil {
 		di.ProjectsController = projects.NewController(
@@ -249,7 +229,6 @@ func (di *DIContainer) GetProjectsController() *projects.Controller {
 			di.GetPostgresProjectsRepository(),
 			di.GetPostgresSCMIntegrationsRepository(),
 			di.GetValidator(),
-			di.GetProjectsTransformer(),
 		)
 	}
 
@@ -270,6 +249,7 @@ func (di *DIContainer) GetSCMIntegrationsHandler() *api.SCMHandler {
 			di.Logger,
 			di.GetSCMIntegrationsController(),
 			di.GetErrorHandlingJsonUnmarshaller(),
+			di.GetAPIResponseBuilder(),
 		)
 	}
 
@@ -282,10 +262,31 @@ func (di *DIContainer) GetProjectsAPIHandler() *api.ProjectsHandler {
 			di.Logger,
 			di.GetProjectsController(),
 			di.GetErrorHandlingJsonUnmarshaller(),
+			di.GetAPIResponseBuilder(),
 		)
 	}
 
 	return di.ProjectsAPIHandler
+}
+
+func (di *DIContainer) GetAPITransformer() *api.Transformer {
+	if di.APITransformer == nil {
+		di.APITransformer = api.NewTransformer()
+	}
+
+	return di.APITransformer
+}
+
+
+func (di *DIContainer) GetAPIResponseBuilder() *api.ResponseBuilder {
+	if di.APIResponseBuilder == nil {
+		di.APIResponseBuilder = api.NewResponseBuilder(
+			di.Logger,
+			di.GetAPITransformer(),
+		)
+	}
+
+	return di.APIResponseBuilder
 }
 
 func (di *DIContainer) GetServer() *api.Server {
@@ -305,11 +306,7 @@ func (di *DIContainer) GetServer() *api.Server {
 }
 
 func (di *DIContainer) GetValidator() *validation.Validator {
-	if di.Validator == nil {
-		di.Validator = validation.NewValidator(di.Logger)
-	}
-
-	return di.Validator
+	return validation.NewValidator(di.Logger)
 }
 
 func NewDIContainer(l zerolog.Logger, fs afero.Fs) *DIContainer {

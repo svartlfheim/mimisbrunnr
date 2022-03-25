@@ -45,5 +45,4 @@ type Result interface {
 	Errors() []error
 	ValidationErrors() []validation.ValidationError
 	Status() Status
-	IsListData() bool
 }
