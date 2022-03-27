@@ -1,4 +1,4 @@
-package api
+package web
 
 import (
 	"testing"
@@ -49,7 +49,7 @@ func Test_Transformer_v1_scmIntegration(t *testing.T) {
 		createdAt1,
 		updatedAt1,
 	)
-	expected := &scmIntegrationV1{
+	expected := &SCMIntegrationV1{
 		ID:        id1.String(),
 		Name:      "myintegration",
 		Type:      string(models.GithubType),
@@ -95,7 +95,7 @@ func Test_Transformer_v1_scmIntegration_list(t *testing.T) {
 			updatedAt2,
 		),
 	}
-	expected := []*scmIntegrationV1{
+	expected := []*SCMIntegrationV1{
 		{
 			ID:        id1.String(),
 			Name:      "myintegration",
@@ -148,11 +148,11 @@ func Test_Transformer_v1_project(t *testing.T) {
 		createdAt1,
 		updatedAt1,
 	)
-	expected := &projectV1{
+	expected := &ProjectV1{
 		ID:   id1.String(),
 		Name: "myproject",
 		Path: "myorg/myrepo",
-		SCMIntegration: &scmIntegrationV1{
+		SCMIntegration: &SCMIntegrationV1{
 			ID:        id2.String(),
 			Name:      "myintegration",
 			Type:      string(models.GithubType),
@@ -219,12 +219,12 @@ func Test_Transformer_v1_project_list(t *testing.T) {
 			updatedAt3,
 		),
 	}
-	expected := []*projectV1{
+	expected := []*ProjectV1{
 		{
 			ID:   id1.String(),
 			Name: "myproject",
 			Path: "myorg/myrepo",
-			SCMIntegration: &scmIntegrationV1{
+			SCMIntegration: &SCMIntegrationV1{
 				ID:        id2.String(),
 				Name:      "myintegration",
 				Type:      string(models.GithubType),
@@ -240,7 +240,7 @@ func Test_Transformer_v1_project_list(t *testing.T) {
 			ID:   id3.String(),
 			Name: "myotherproject",
 			Path: "myorg/myotherrepo",
-			SCMIntegration: &scmIntegrationV1{
+			SCMIntegration: &SCMIntegrationV1{
 				ID:        id2.String(),
 				Name:      "myintegration",
 				Type:      string(models.GithubType),

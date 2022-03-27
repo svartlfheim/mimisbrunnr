@@ -1,4 +1,4 @@
-package api
+package web
 
 import (
 	"context"
@@ -100,7 +100,7 @@ func (h *ProjectsHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := h.rb.FromCommandResult(
-		r.Context().Value(apiVersionContextKey).(int),
+		r.Context().Value(ApiVersionContextKey).(int),
 		h.controller.ListV1(dto),
 	)
 
@@ -115,7 +115,7 @@ func (h *ProjectsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		resp = h.rb.FromUnmarshalError(err)
 	} else {
 		resp = h.rb.FromCommandResult(
-			r.Context().Value(apiVersionContextKey).(int),
+			r.Context().Value(ApiVersionContextKey).(int),
 			h.controller.AddV1(dto),
 		)
 	}
@@ -127,7 +127,7 @@ func (h *ProjectsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value(projectIDContextKey).(string)
 
 	resp := h.rb.FromCommandResult(
-		r.Context().Value(apiVersionContextKey).(int),
+		r.Context().Value(ApiVersionContextKey).(int),
 		h.controller.GetV1(id),
 	)
 
@@ -143,7 +143,7 @@ func (h *ProjectsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		resp = h.rb.FromUnmarshalError(err)
 	} else {
 		resp = h.rb.FromCommandResult(
-			r.Context().Value(apiVersionContextKey).(int),
+			r.Context().Value(ApiVersionContextKey).(int),
 			h.controller.UpdateV1(id, dto),
 		)
 	}
@@ -154,7 +154,7 @@ func (h *ProjectsHandler) Update(w http.ResponseWriter, r *http.Request) {
 func (h *ProjectsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value(projectIDContextKey).(string)
 	resp := h.rb.FromCommandResult(
-		r.Context().Value(apiVersionContextKey).(int),
+		r.Context().Value(ApiVersionContextKey).(int),
 		h.controller.DeleteV1(id),
 	)
 

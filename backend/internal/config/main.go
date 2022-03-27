@@ -9,6 +9,12 @@ import (
 type App interface {
 	GetHTTPPort() string
 	GetListenHost() string
+	HTTPAPIEnabled() bool
+	HTTPStaticServerEnabled() bool
+	GetHTTPStaticContentPath() string
+	HTTPFrontendEnabled() bool
+
+	GetOpenAPIGeneratePath() string
 
 	GetRDBDriver() string
 	GetRDBHost() string
@@ -22,9 +28,25 @@ type App interface {
 	GetRDBMigrationsPassword() string
 }
 
+type HTTPFrontendConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
+type HTTPAPIConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
+type HTTPStaticConfig struct {
+	Path string `yaml:"path"`
+	Enabled bool `yaml:"enabled"`
+}
+
 type HTTPConfig struct {
 	Port       string `yaml:"port"`
 	ListenHost string `yaml:"listen_host" split_words:"true"`
+	API HTTPAPIConfig `yaml:"api"`
+	Static HTTPStaticConfig `yaml:"static"`
+	Frontend HTTPFrontendConfig `yaml:"frontend"`
 }
 
 type RDBMigrationsConfig struct {
@@ -43,8 +65,13 @@ type RDBConfig struct {
 	Migrations RDBMigrationsConfig `yaml:"migrations"`
 }
 
+type OpenAPIConfig struct {
+	Path string `yaml:"path"`
+}
+
 type AppConfig struct {
 	HTTP HTTPConfig `yaml:"http"`
+	OpenAPI OpenAPIConfig `yaml:"openapi"`
 	RDB  RDBConfig  `yaml:"rdb"`
 }
 
@@ -54,6 +81,26 @@ func (c *AppConfig) GetHTTPPort() string {
 
 func (c *AppConfig) GetListenHost() string {
 	return c.HTTP.ListenHost
+}
+
+func (c *AppConfig) HTTPAPIEnabled() bool {
+	return c.HTTP.API.Enabled
+}
+
+func (c *AppConfig) HTTPStaticServerEnabled() bool {
+	return c.HTTP.Static.Enabled
+}
+
+func (c *AppConfig) GetHTTPStaticContentPath() string {
+	return c.HTTP.Static.Path
+}
+
+func (c *AppConfig) HTTPFrontendEnabled() bool {
+	return c.HTTP.Frontend.Enabled
+}
+
+func (c *AppConfig) GetOpenAPIGeneratePath() string {
+	return c.OpenAPI.Path
 }
 
 func (c *AppConfig) GetRDBDriver() string {

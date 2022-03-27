@@ -1,6 +1,16 @@
 http:
   port: 8080
   listen_host: 0.0.0.0
+  api:
+    enabled: true
+  frontend:
+    enabled: true
+  static:
+    enabled: true
+    path: /var/www/static
+
+openapi:
+    path: /var/www/static/openapi.json
 
 rdb:
   driver: postgres
