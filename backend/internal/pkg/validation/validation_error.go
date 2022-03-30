@@ -34,7 +34,7 @@ var messagesForRule map[Rule]MessageGenerator = map[Rule]MessageGenerator{
 	},
 
 	uuidRule: func(ve Error) string {
-		return "must be a value uuid"
+		return "must be a valid uuid"
 	},
 
 	lessThanOrEqualToRule: func(ve Error) string {
@@ -177,5 +177,16 @@ func (ve Error) Parameters() map[string]string {
 
 	return map[string]string{
 		"param": ve.param,
+	}
+}
+
+func NewError(path string, rule string, param string, valueType string, extraMessageGenerators map[Rule]MessageGenerator, extraParameterParsers map[Rule]ParameterParser) Error {
+	return Error{
+		path:                   path,
+		rule:                   rule,
+		param:                  param,
+		valueType:              valueType,
+		extraMessageGenerators: extraMessageGenerators,
+		extraParameterParsers:  extraParameterParsers,
 	}
 }

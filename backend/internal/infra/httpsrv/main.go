@@ -19,18 +19,25 @@ type ApiController interface {
 	Routes() http.Handler
 	RouteGroup() string
 }
+type openAPIGenerator interface {
+	Generate(bool) ([]byte, error)
+}
+
 type ServerConfig interface {
 	HTTPAPIEnabled() bool
 	HTTPStaticServerEnabled() bool
 	HTTPFrontendEnabled() bool
+	HTTPOpenAPIEnabled() bool
+	GetOpenAPIPath() string
 	GetHTTPStaticContentPath() string
 	GetHTTPPort() string
 	GetListenHost() string
 }
 
 type Server struct {
-	logger      zerolog.Logger
+	logger         zerolog.Logger
 	apiControllers []ApiController
+	openAPIGenerator openAPIGenerator
 }
 
 // Add the apiVersion to request context
@@ -111,6 +118,43 @@ func (s *Server) buildRouter(c ServerConfig) http.Handler {
 	r.Use(middleware.GetHead)
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	if c.HTTPOpenAPIEnabled() {
+		r.Get("/openapi", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			// https://github.com/stoplightio/elements#web-component
+			body := `
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Elements in HTML</title>
+    <!-- Embed elements Elements via Web Component -->
+    <script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css">
+  </head>
+  <body>
+      <elements-api
+        apiDescriptionUrl="/static/openapi.json?cachebust=` + strconv.Itoa(int(time.Now().Unix())) + `"
+        router="hash"
+        layout="sidebar"
+      />
+  </body>
+</html>`
+			w.Write([]byte(body))
+		})
+		r.Get(c.GetOpenAPIPath(), func(w http.ResponseWriter, r *http.Request) {
+			out, err := s.openAPIGenerator.Generate(false)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			w.Write(out)
+		})
+	}
 	if c.HTTPStaticServerEnabled() {
 		staticFileServer(r, "/static", http.Dir(c.GetHTTPStaticContentPath()))
 	}
@@ -120,7 +164,7 @@ func (s *Server) buildRouter(c ServerConfig) http.Handler {
 			r.Use(ensureJSONRequest)
 			r.Use(ensureJSONResponse)
 			r.Use(apiContext)
-	
+
 			for _, c := range s.apiControllers {
 				r.Mount(
 					fmt.Sprintf("/%s", c.RouteGroup()),
@@ -157,9 +201,10 @@ func (s *Server) Start(c ServerConfig) error {
 	return http.ListenAndServe(listenOn, r)
 }
 
-func NewServer(logger zerolog.Logger, apiControllers []ApiController) *Server {
+func NewServer(logger zerolog.Logger, apiControllers []ApiController, oAPIGen openAPIGenerator) *Server {
 	return &Server{
-		logger:      logger,
+		logger:         logger,
 		apiControllers: apiControllers,
+		openAPIGenerator: oAPIGen,
 	}
 }

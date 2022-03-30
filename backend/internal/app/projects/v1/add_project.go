@@ -43,7 +43,7 @@ func (r *addProjectResponse) Data() interface{} {
 }
 
 func (r *addProjectResponse) Meta() interface{} {
-	return map[string]interface{}{}
+	return nil
 }
 
 func (r *addProjectResponse) Errors() []error {
@@ -60,7 +60,7 @@ func (r *addProjectResponse) Status() commandresult.Status {
 
 func Add(repo addProjectRepo, iRepo addProjectIntegrationRepo, v StructValidator, dto AddProjectDTO) commandresult.Result {
 	validationErrors, err := v.ValidateStruct(
-		dto, 
+		dto,
 		rules.Unique(repo, nil),
 		rules.Exists(iRepo),
 		rules.UniquePerIntegration(repo, nil),

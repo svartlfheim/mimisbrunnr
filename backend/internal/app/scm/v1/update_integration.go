@@ -61,12 +61,14 @@ func (r *updateIntegrationResponse) Data() interface{} {
 }
 
 func (r *updateIntegrationResponse) Meta() interface{} {
+	if r.changeset == nil {
+		return nil
+	}
+
 	modifiedFields := []string{}
 
-	if r.changeset != nil {
-		for k := range r.changeset.Changes {
-			modifiedFields = append(modifiedFields, k)
-		}
+	for k := range r.changeset.Changes {
+		modifiedFields = append(modifiedFields, k)
 	}
 
 	return map[string]interface{}{

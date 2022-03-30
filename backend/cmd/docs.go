@@ -1,11 +1,18 @@
 package cmd
 
 import (
-	"github.com/spf13/afero"
+	"fmt"
+
 	"github.com/svartlfheim/mimisbrunnr/internal/app/openapi"
-	"github.com/svartlfheim/mimisbrunnr/internal/config"
 )
 
-func handleDocsOpenAPI(cfg *config.AppConfig, fs afero.Fs, args []string) error {
-	return openapi.Generate(cfg, fs)
+func handleDocsOpenAPI(g *openapi.Generator, args []string) error {
+	out, err := g.Generate(true)
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(string(out))
+
+	return nil
 }

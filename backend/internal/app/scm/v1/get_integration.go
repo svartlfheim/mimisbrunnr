@@ -22,7 +22,7 @@ func (r *getIntegrationResponse) Data() interface{} {
 }
 
 func (r *getIntegrationResponse) Meta() interface{} {
-	return map[string]interface{}{}
+	return nil
 }
 
 func (r *getIntegrationResponse) Errors() []error {

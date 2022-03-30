@@ -24,7 +24,7 @@ func (r *deleteIntegrationResponse) Data() interface{} {
 
 func (r *deleteIntegrationResponse) Meta() interface{} {
 
-	return map[string]interface{}{}
+	return nil
 }
 
 func (r *deleteIntegrationResponse) Errors() []error {

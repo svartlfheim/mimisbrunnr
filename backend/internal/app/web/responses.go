@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 
 	"github.com/rs/zerolog"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/commandresult"
@@ -10,7 +11,7 @@ import (
 
 type WritableResponse interface {
 	StatusCode() int
-	Body() ([]byte)
+	Body() []byte
 	Write(w http.ResponseWriter)
 }
 
@@ -20,12 +21,25 @@ type responseBuilderTransformer interface {
 
 type OkayResponse struct {
 	Status           int          `json:"-"`
-	Data             interface{}  `json:"data"`
-	Meta             interface{}  `json:"meta"`
-	ValidationErrors []fieldError `json:"validation_errors"`
+	Data             interface{}  `json:"data,omitempty"`
+	Meta             interface{}  `json:"meta,omitempty"`
+	ValidationErrors []FieldError `json:"validation_errors,omitempty"`
 }
 
-func (r OkayResponse) Body() ([]byte) {
+func (r OkayResponse) Body() []byte {
+	rType := reflect.TypeOf(r.Data)
+	rVal := reflect.ValueOf(r.Data)
+
+	// It will be nil-ish
+	// It will likely be (*type)(nil) which doesn't get omitted during json encode
+	// We wanna omit if it is nil
+	dataIsNil := rType.Kind() == reflect.Ptr && rVal.IsNil()
+	dataIsEmptySlice := rType.Kind() == reflect.Slice && rVal.Len() == 0
+
+	if dataIsNil || dataIsEmptySlice {
+		r.Data = nil
+	}
+
 	b, err := json.Marshal(r)
 
 	if err != nil {
@@ -43,12 +57,12 @@ func (r OkayResponse) Write(w http.ResponseWriter) {
 }
 
 type ErrorResponse struct {
-	Status  int     `json:"-"`
-	Message string  `json:"message"`
+	Status  int      `json:"-"`
+	Message string   `json:"message"`
 	Errors  []string `json:"errors"`
 }
 
-func (r ErrorResponse) Body() ([]byte) {
+func (r ErrorResponse) Body() []byte {
 	b, err := json.Marshal(r)
 
 	if err != nil {
@@ -66,10 +80,10 @@ func (r ErrorResponse) Write(w http.ResponseWriter) {
 }
 
 type EmptyResponse struct {
-	Status  int `json:"-"`
+	Status int `json:"-"`
 }
 
-func (r EmptyResponse) Body() ([]byte) {
+func (r EmptyResponse) Body() []byte {
 	return []byte{}
 }
 
@@ -81,7 +95,7 @@ func (r EmptyResponse) Write(w http.ResponseWriter) {
 	writeResponse(w, r)
 }
 
-type fieldError struct {
+type FieldError struct {
 	Path       string            `json:"path"`
 	Message    string            `json:"message"`
 	Parameters map[string]string `json:"params"`
@@ -98,10 +112,10 @@ func writeResponse(w http.ResponseWriter, resp WritableResponse) {
 	}
 }
 
-func buildValidationErrorsFromCommandResult(r commandresult.Result) []fieldError {
-	fieldErrors := []fieldError{}
+func buildValidationErrorsFromCommandResult(r commandresult.Result) []FieldError {
+	fieldErrors := []FieldError{}
 	for _, err := range r.ValidationErrors() {
-		fieldErrors = append(fieldErrors, fieldError{
+		fieldErrors = append(fieldErrors, FieldError{
 			Path:       err.Path(),
 			Rule:       err.Rule(),
 			Message:    err.Message(),
@@ -122,7 +136,7 @@ func (rb *ResponseBuilder) buildInternalErrorResponse(errs ...error) ErrorRespon
 
 	errsAsStrings := []string{}
 
-	for _, err := range(errs) {
+	for _, err := range errs {
 		errsAsStrings = append(errsAsStrings, err.Error())
 	}
 	return ErrorResponse{
@@ -137,7 +151,7 @@ func (rb *ResponseBuilder) buildBadRequestResponse(errs ...error) ErrorResponse 
 
 	errsAsStrings := []string{}
 
-	for _, err := range(errs) {
+	for _, err := range errs {
 		errsAsStrings = append(errsAsStrings, err.Error())
 	}
 
@@ -188,6 +202,6 @@ func (rb *ResponseBuilder) FromUnmarshalError(err error) WritableResponse {
 func NewResponseBuilder(l zerolog.Logger, trans responseBuilderTransformer) *ResponseBuilder {
 	return &ResponseBuilder{
 		logger: l,
-		trans: trans,
+		trans:  trans,
 	}
 }

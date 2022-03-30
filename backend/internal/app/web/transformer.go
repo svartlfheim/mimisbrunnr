@@ -7,12 +7,12 @@ import (
 )
 
 type ProjectV1 struct {
-	ID             string           `json:"id"`
-	Name           string           `json:"name"`
-	Path           string           `json:"path"`
+	ID             string            `json:"id"`
+	Name           string            `json:"name"`
+	Path           string            `json:"path"`
 	SCMIntegration *SCMIntegrationV1 `json:"scm_integration"`
-	CreatedAt      string           `json:"created_at"`
-	UpdatedAt      string           `json:"updated_at"`
+	CreatedAt      string            `json:"created_at"`
+	UpdatedAt      string            `json:"updated_at"`
 }
 
 type SCMIntegrationV1 struct {

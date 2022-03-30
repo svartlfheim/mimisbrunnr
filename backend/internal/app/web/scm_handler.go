@@ -28,7 +28,7 @@ type SCMHandler struct {
 	logger           zerolog.Logger
 	controller       SCMIntegrationsController
 	jsonUnmarshaller jsonUnmarshaller
-	rb            scmResponseBuilder
+	rb               scmResponseBuilder
 }
 
 func SCMIntegrationContext(next http.Handler) http.Handler {
@@ -145,6 +145,6 @@ func NewSCMIntegrationsHandler(l zerolog.Logger, m SCMIntegrationsController, jU
 		logger:           l,
 		controller:       m,
 		jsonUnmarshaller: jU,
-		rb: rb,
+		rb:               rb,
 	}
 }

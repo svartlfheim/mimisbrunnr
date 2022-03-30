@@ -61,12 +61,14 @@ func (r *updateIntegrationResponse) Data() interface{} {
 }
 
 func (r *updateIntegrationResponse) Meta() interface{} {
+	if r.changeset == nil {
+		return nil
+	}
+
 	modifiedFields := []string{}
 
-	if r.changeset != nil {
-		for k := range r.changeset.Changes {
-			modifiedFields = append(modifiedFields, k)
-		}
+	for k := range r.changeset.Changes {
+		modifiedFields = append(modifiedFields, k)
 	}
 
 	return map[string]interface{}{
@@ -115,7 +117,7 @@ func Update(repo updateProjectRepository, iR updateProjectIntegrationRepo, v Str
 	}
 
 	validationErrors, err := v.ValidateStruct(
-		dto, 
+		dto,
 		rules.Unique(repo, existing),
 		rules.Exists(iR),
 		rules.UniquePerIntegration(repo, existing),
@@ -147,7 +149,6 @@ func Update(repo updateProjectRepository, iR updateProjectIntegrationRepo, v Str
 	}
 
 	updated, err := repo.Patch(uuid, cs)
-
 
 	if err != nil {
 		return &updateIntegrationResponse{
