@@ -179,6 +179,11 @@ func (s *Server) buildRouter(c ServerConfig) http.Handler {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`
 <html>
+<head>
+	<meta charset="utf-8">
+	<title>Mimisbrunnr</title>
+	<script src="/static/js/index.js?cachebust=` + strconv.Itoa(int(time.Now().Unix())) + `"></script>
+</head>
 <body>
 	<h1>From CHI</h1>
 </body>
