@@ -1,0 +1,9 @@
+.contentWrapper {
+    padding-top: var(--header-wrapper-size);
+    padding-left: var(--menu-closed-size);
+}
+
+.content {
+    padding: var(--content-padding);
+    width: calc(100% - calc(2 * var(--content-padding)));
+}
