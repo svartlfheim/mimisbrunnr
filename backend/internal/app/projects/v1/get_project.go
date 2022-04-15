@@ -22,7 +22,7 @@ func (r *getProjectResponse) Data() interface{} {
 }
 
 func (r *getProjectResponse) Meta() interface{} {
-	return map[string]interface{}{}
+	return nil
 }
 
 func (r *getProjectResponse) Errors() []error {

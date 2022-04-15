@@ -51,7 +51,7 @@ func (r *addIntegrationResponse) Data() interface{} {
 }
 
 func (r *addIntegrationResponse) Meta() interface{} {
-	return map[string]interface{}{}
+	return nil
 }
 
 func (r *addIntegrationResponse) Errors() []error {

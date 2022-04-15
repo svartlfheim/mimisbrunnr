@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"errors"
 	"math"
+	"strconv"
 
 	"github.com/svartlfheim/mimisbrunnr/internal/models"
 	"github.com/svartlfheim/mimisbrunnr/internal/pkg/commandresult"
@@ -41,7 +41,7 @@ func (r *listIntegrationsResponse) Meta() interface{} {
 	if !r.status.Equals(commandresult.Okay) {
 		// Return no meta if the request was no okay
 		// The values will likely be empty
-		return map[string]interface{}{}
+		return nil
 	}
 
 	return map[string]interface{}{
@@ -115,10 +115,17 @@ func List(repo listIntegrationsRepository, v StructValidator, dto ListIntegratio
 
 	if page != 1 && page > numPages {
 		return &listIntegrationsResponse{
-			errors: []error{
-				errors.New("page out of bounds"),
+			validationErrors: []validation.ValidationError{
+				validation.NewError(
+					"page",
+					"lte",
+					strconv.Itoa(numPages),
+					"int",
+					map[validation.Rule]validation.MessageGenerator{},
+					map[validation.Rule]validation.ParameterParser{},
+				),
 			},
-			status: commandresult.BadInput,
+			status: commandresult.Invalid,
 		}
 	}
 

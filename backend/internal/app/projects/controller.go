@@ -19,10 +19,10 @@ type structValidator interface {
 }
 
 type Controller struct {
-	logger      zerolog.Logger
-	repo        projectsRepository
-	iRepo       integrationRepository
-	validator   structValidator
+	logger    zerolog.Logger
+	repo      projectsRepository
+	iRepo     integrationRepository
+	validator structValidator
 }
 
 func (m *Controller) AddV1(dto v1.AddProjectDTO) commandresult.Result {
@@ -47,9 +47,9 @@ func (m *Controller) DeleteV1(id string) commandresult.Result {
 
 func NewController(l zerolog.Logger, repo projectsRepository, iRepo integrationRepository, v structValidator) *Controller {
 	return &Controller{
-		logger:      l,
-		repo:        repo,
-		iRepo:       iRepo,
-		validator:   v,
+		logger:    l,
+		repo:      repo,
+		iRepo:     iRepo,
+		validator: v,
 	}
 }

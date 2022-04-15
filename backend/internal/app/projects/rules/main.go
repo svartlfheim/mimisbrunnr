@@ -20,7 +20,7 @@ type existsValidationRepo interface {
 	Find(uuid.UUID) (*models.SCMIntegration, error)
 }
 
-func Unique(repo uniqueValidationRepo, existingRecord *models.Project) func(v *validator.Validate) (*validator.Validate) {
+func Unique(repo uniqueValidationRepo, existingRecord *models.Project) func(v *validator.Validate) *validator.Validate {
 	return func(v *validator.Validate) *validator.Validate {
 		err := v.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
 			m, err := repo.FindByName(fl.Field().String())
@@ -46,12 +46,11 @@ func Unique(repo uniqueValidationRepo, existingRecord *models.Project) func(v *v
 	}
 }
 
-func UniquePerIntegration(repo uniquePerIntegrationRepo, existingRecord *models.Project) func(v *validator.Validate) (*validator.Validate) {
+func UniquePerIntegration(repo uniquePerIntegrationRepo, existingRecord *models.Project) func(v *validator.Validate) *validator.Validate {
 	return func(v *validator.Validate) *validator.Validate {
 		err := v.RegisterValidation("uniqueperotherfield", func(fl validator.FieldLevel) bool {
 			var integrationID uuid.UUID
 			integrationIDField, _, _, _ := fl.GetStructFieldOKAdvanced2(fl.Parent(), "IntegrationID")
-
 
 			if existingRecord == nil && (integrationIDField.Kind() == reflect.Ptr && integrationIDField.IsNil()) {
 				return false
@@ -86,7 +85,7 @@ func UniquePerIntegration(repo uniquePerIntegrationRepo, existingRecord *models.
 			}
 
 			return isOkay || m.GetID().String() == existingRecord.GetID().String()
-				
+
 		})
 
 		if err != nil {
@@ -97,7 +96,7 @@ func UniquePerIntegration(repo uniquePerIntegrationRepo, existingRecord *models.
 	}
 }
 
-func Exists(repo existsValidationRepo) func(v *validator.Validate) (*validator.Validate) {
+func Exists(repo existsValidationRepo) func(v *validator.Validate) *validator.Validate {
 	return func(v *validator.Validate) *validator.Validate {
 		err := v.RegisterValidation("exists", func(fl validator.FieldLevel) bool {
 			integrationID, err := uuid.Parse(fl.Field().String())

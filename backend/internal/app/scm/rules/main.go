@@ -9,7 +9,7 @@ type uniqueValidationRepo interface {
 	FindByName(string) (*models.SCMIntegration, error)
 }
 
-func Unique(repo uniqueValidationRepo, existingRecord *models.SCMIntegration) func(v *validator.Validate) (*validator.Validate) {
+func Unique(repo uniqueValidationRepo, existingRecord *models.SCMIntegration) func(v *validator.Validate) *validator.Validate {
 	return func(v *validator.Validate) *validator.Validate {
 		err := v.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
 			m, err := repo.FindByName(fl.Field().String())
@@ -21,7 +21,7 @@ func Unique(repo uniqueValidationRepo, existingRecord *models.SCMIntegration) fu
 			isOkay := m == nil
 			if existingRecord == nil {
 				return isOkay
-			} 
+			}
 
 			return isOkay || m.GetID().String() == existingRecord.GetID().String()
 		})

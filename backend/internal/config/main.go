@@ -13,8 +13,9 @@ type App interface {
 	HTTPStaticServerEnabled() bool
 	GetHTTPStaticContentPath() string
 	HTTPFrontendEnabled() bool
-
-	GetOpenAPIGeneratePath() string
+	
+	HTTPOpenAPIEnabled()
+	GetOpenAPIPath() string
 
 	GetRDBDriver() string
 	GetRDBHost() string
@@ -37,16 +38,21 @@ type HTTPAPIConfig struct {
 }
 
 type HTTPStaticConfig struct {
-	Path string `yaml:"path"`
-	Enabled bool `yaml:"enabled"`
+	Path    string `yaml:"path"`
+	Enabled bool   `yaml:"enabled"`
+}
+
+type HTTPEndpointsConfig struct {
+	OpenAPIEnabled bool `yaml:"openapi_enabled"`
 }
 
 type HTTPConfig struct {
-	Port       string `yaml:"port"`
-	ListenHost string `yaml:"listen_host" split_words:"true"`
-	API HTTPAPIConfig `yaml:"api"`
-	Static HTTPStaticConfig `yaml:"static"`
-	Frontend HTTPFrontendConfig `yaml:"frontend"`
+	Port       string             `yaml:"port"`
+	ListenHost string             `yaml:"listen_host" split_words:"true"`
+	API        HTTPAPIConfig      `yaml:"api"`
+	Static     HTTPStaticConfig   `yaml:"static"`
+	Frontend   HTTPFrontendConfig `yaml:"frontend"`
+	Endpoints  HTTPEndpointsConfig `yaml:"endpoints"`
 }
 
 type RDBMigrationsConfig struct {
@@ -70,9 +76,9 @@ type OpenAPIConfig struct {
 }
 
 type AppConfig struct {
-	HTTP HTTPConfig `yaml:"http"`
+	HTTP    HTTPConfig    `yaml:"http"`
 	OpenAPI OpenAPIConfig `yaml:"openapi"`
-	RDB  RDBConfig  `yaml:"rdb"`
+	RDB     RDBConfig     `yaml:"rdb"`
 }
 
 func (c *AppConfig) GetHTTPPort() string {
@@ -99,7 +105,15 @@ func (c *AppConfig) HTTPFrontendEnabled() bool {
 	return c.HTTP.Frontend.Enabled
 }
 
-func (c *AppConfig) GetOpenAPIGeneratePath() string {
+func (c *AppConfig) HTTPOpenAPIEnabled() bool {
+	return c.HTTP.Endpoints.OpenAPIEnabled
+}
+
+func (c *AppConfig) GetOpenAPIPath() string {
+	if c.OpenAPI.Path == "" {
+		return "/static/openapi.json"
+	}
+
 	return c.OpenAPI.Path
 }
 

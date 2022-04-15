@@ -1,0 +1,12 @@
+{
+    "private": true,
+    "workspaces": [
+        "app",
+        "api-client"
+    ],
+    "scripts": {
+        "app": "yarn workspace app",
+        "api-client": "yarn workspace api-client"
+    },
+    "packageManager": "yarn@3.2.0"
+}

@@ -29,7 +29,7 @@ type ProjectsHandler struct {
 	logger           zerolog.Logger
 	controller       ProjectsController
 	jsonUnmarshaller jsonUnmarshaller
-	rb projectsResponseBuilder
+	rb               projectsResponseBuilder
 }
 
 func projectContext(next http.Handler) http.Handler {
@@ -202,6 +202,6 @@ func NewProjectsHandler(l zerolog.Logger, c ProjectsController, jU jsonUnmarshal
 		logger:           l,
 		controller:       c,
 		jsonUnmarshaller: jU,
-		rb:            rb,
+		rb:               rb,
 	}
 }

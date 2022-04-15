@@ -20,9 +20,9 @@ type structValidator interface {
 }
 
 type Controller struct {
-	logger      zerolog.Logger
-	repo        managerRepository
-	validator   structValidator
+	logger    zerolog.Logger
+	repo      managerRepository
+	validator structValidator
 }
 
 func (m *Controller) AddV1(dto v1.AddIntegrationDTO) commandresult.Result {
@@ -83,8 +83,8 @@ func NewController(l zerolog.Logger, repo managerRepository, v structValidator) 
 	RegisterExtraValidations(v)
 
 	return &Controller{
-		logger:      l,
-		repo:        repo,
-		validator:   v,
+		logger:    l,
+		repo:      repo,
+		validator: v,
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/svartlfheim/gomigrator"
+	"github.com/svartlfheim/mimisbrunnr/internal/app/openapi"
 	"github.com/svartlfheim/mimisbrunnr/internal/app/projects"
 	"github.com/svartlfheim/mimisbrunnr/internal/app/scm"
 	"github.com/svartlfheim/mimisbrunnr/internal/app/web"
@@ -32,8 +33,11 @@ type DIContainer struct {
 	SCMIntegrationsController         *scm.Controller
 
 	// projects.*
-	ProjectsController  *projects.Controller
-	ProjectsRepository  *postgres.ProjectsRepository
+	ProjectsController *projects.Controller
+	ProjectsRepository *postgres.ProjectsRepository
+
+	// openapi.*
+	OpenAPIGenerator *openapi.Generator
 
 	// schema.*
 	Migrator *gomigrator.Migrator
@@ -43,7 +47,7 @@ type DIContainer struct {
 	SCMIntegrationsHandler        *web.SCMHandler
 	ProjectsAPIHandler            *web.ProjectsHandler
 	APITransformer                *web.Transformer
-	APIResponseBuilder *web.ResponseBuilder
+	APIResponseBuilder            *web.ResponseBuilder
 	ErrorHandlingJsonUnmarshaller *web.ErrorHandlingJsonUnmarshaller
 
 	// External dependencies
@@ -120,7 +124,7 @@ func (di *DIContainer) GetCommands() []*cobra.Command {
 		Use:   "openapi",
 		Short: "Generates openapi docs",
 		RunE: di.commandWrap(func(args []string) error {
-			return handleDocsOpenAPI(di.Cfg, di.Fs, args)
+			return handleDocsOpenAPI(di.GetOpenAPIGenerator(), args)
 		}),
 	})
 
@@ -294,7 +298,6 @@ func (di *DIContainer) GetAPITransformer() *web.Transformer {
 	return di.APITransformer
 }
 
-
 func (di *DIContainer) GetAPIResponseBuilder() *web.ResponseBuilder {
 	if di.APIResponseBuilder == nil {
 		di.APIResponseBuilder = web.NewResponseBuilder(
@@ -314,12 +317,23 @@ func (di *DIContainer) GetServer() *httpsrv.Server {
 				di.GetSCMIntegrationsHandler(),
 				di.GetProjectsAPIHandler(),
 			},
+			di.GetOpenAPIGenerator(),
 		)
 
 		di.Server = s
 	}
 
 	return di.Server
+}
+
+func (di *DIContainer) GetOpenAPIGenerator() *openapi.Generator {
+	if di.OpenAPIGenerator == nil {
+		g := openapi.NewGenerator()
+
+		di.OpenAPIGenerator = g
+	}
+
+	return di.OpenAPIGenerator
 }
 
 func (di *DIContainer) GetValidator() *validation.Validator {

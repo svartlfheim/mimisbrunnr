@@ -66,8 +66,7 @@ services:
       MIMISBRUNNR_RDB_MIGRATIONS_USERNAME: ${MIGRATIONS_DB_USER}
       MIMISBRUNNR_RDB_MIGRATIONS_PASSWORD: ${MIGRATIONS_DB_USER_PASSWORD}
       # --- INTEGRATION TEST VARS (ITEST_*) --- #
-      # The Makefile in ./backend will override this
-      CI_INTEGRATION_TESTS_ENABLED: "false"
+      CI_INTEGRATION_TESTS_ENABLED: "false" # The Makefile in ./backend will override this
       ITEST_MIMISBRUNNR_RDB_DRIVER: ${TEST_POSTGRES_DB_DRIVER}
       ITEST_MIMISBRUNNR_RDB_HOST: ${TEST_POSTGRES_DB_HOST}
       ITEST_MIMISBRUNNR_RDB_PORT: ${TEST_POSTGRES_DB_PORT}
@@ -79,9 +78,9 @@ services:
       ITEST_MIMISBRUNNR_RDB_MIGRATIONS_PASSWORD: ${TEST_POSTGRESS_MIGRATIONS_DB_USER_PASSWORD}
     volumes:
       - ../../backend:/go/src/app-dev
-      - ../../static:/var/www/static
     labels:
-      - "traefik.http.routers.backend.rule=Host(`mimisbrunnr.local`)"
+      - "traefik.http.routers.backend.rule=Host(`mimisbrunnr.local`) && (PathPrefix(`/api`) || PathPrefix(`/static/openapi`))"
+      - "traefik.http.routers.backend.priority=2"
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
@@ -105,7 +104,37 @@ services:
       - "traefik.http.routers.pgadmin.tls=true"
 
   frontend:
-    image: node:17
+    build:
+      context: ./frontend
+      target: dev
     working_dir: /srv
+    environment:
+      OPENAPI_SPEC_PATH: /var/openapi/openapi.json
     volumes:
+      - "~/.gitconfig:/root/.gitconfig"
       - "../../frontend:/srv"
+      - "../../docs/openapi.json:/var/openapi/openapi.json"
+    labels:
+      - "traefik.http.routers.frontend.rule=Host(`mimisbrunnr.local`)"
+      - "traefik.http.routers.frontend.priority=1"
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend.tls=true"
+
+  # gen-api-client:
+  #   profiles:
+  #     - manual
+  #   image:
+  #     openapitools/openapi-generator-cli
+  #   command:
+  #     - generate
+  #     - -i
+  #     - /srv/in/openapi.json
+  #     - -g
+  #     - typescript-fetch
+  #     - -o
+  #     - /srv/out/
+  #   volumes:
+  #     - "../../frontend/api-client/src/fetch:/srv/out"
+  #     - "../../docs/openapi.json:/srv/in/openapi.json"

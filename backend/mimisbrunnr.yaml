@@ -8,9 +8,11 @@ http:
   static:
     enabled: true
     path: /var/www/static
+  endpoints:
+    openapi_enabled: true
 
 openapi:
-    path: /var/www/static/openapi.json
+    path: /static/openapi.json
 
 rdb:
   driver: postgres
