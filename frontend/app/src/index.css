@@ -1,11 +1,11 @@
 @import-normalize; /* bring in normalize.css styles */
 
 :root {
-    --light-blue: #cedcff;
+    --light-blue: #afafaf;
 
     --main-background-colour: #eceff0;
 
-    --logo-blue: #195afa;
+    --logo-blue: #5a5a5a;
     --header-wrapper-size: 95px;
     /* if toolbar is enabled --header-wrapper-size: 120px; */
     --header-size: 60px;
@@ -16,9 +16,8 @@
     --header-toolbar-colour: #ff8100;
     --header-menu-icon-size: 30px;
     --header-breadcrumbs-size: 35px;
-    --header-breadcrumbs-z-index: 400;
 
-    --menu-z-index: 450;
+    --menu-z-index: 600;
     --menu-closed-size: 50px;
     --menu-hpadding: 5px;
     --menu-li-padding: 5px;

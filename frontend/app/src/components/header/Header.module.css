@@ -4,7 +4,7 @@
     left: 0;
     width: 100vw;
     height: var(--header-wrapper-size);
-    
+    z-index: var(--header-z-index);
     
 }
 .header {
@@ -14,7 +14,6 @@
     background: var(--header-colour);
     font-size: 2.5rem;
     padding: var(--header-padding);
-    z-index: var(--header-z-index);
     height: calc(var(--header-size) - var(--header-padding) - var(--header-padding));
     
 }
@@ -27,7 +26,6 @@
     padding: var(--header-padding) var(--header-padding) var(--header-padding) calc(var(--menu-closed-size) + var(--header-padding));
     background: var(--logo-blue);
     overflow-x: scroll;
-    z-index: var(--header-breadcrumbs-z-index);
     white-space: nowrap;
     box-shadow: 0px 3px 5px #0003;
 }

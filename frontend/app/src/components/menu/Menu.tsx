@@ -1,76 +1,145 @@
 import styles from './Menu.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHome as faHome } from '@fortawesome/free-solid-svg-icons'
-import { faCodeBranch as faIntegrations } from '@fortawesome/free-solid-svg-icons'
-import { faDiagramProject as faProjects } from '@fortawesome/free-solid-svg-icons'
-import { faCog as faSettings } from '@fortawesome/free-solid-svg-icons'
-import { faQuestion as faUnknown } from '@fortawesome/free-solid-svg-icons'
+import { faQuestion as faUnknown, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { IconDefinition } from '@fortawesome/fontawesome-common-types'
-import { NavLink } from 'react-router-dom'
-import { CSSProperties } from "react"
+import {
+    NavLink, 
+    useLocation,
+    useMatch,
+    useResolvedPath,
+} from 'react-router-dom'
+import type { Location } from "history";
+import { Route } from "../../service/router"
+import { useState } from "react"
 
-
-
-// import { faArrowsLeftRightToLine as faIntegrations } from '@fortawesome/free-solid-svg-icons'
-// import { faBezierCurve as faIntegrations } from '@fortawesome/free-solid-svg-icons'
-// import { faBookAtlas as faProjects } from '@fortawesome/free-solid-svg-icons'
-
+const MENU_ID="sidebar-menu";
 
 type ItemProps = {
     title?: string;
     displayTitle: boolean;
     icon?: IconDefinition;
-    route: string;
+    route: Route;
+    menuIsOpen: boolean;
+    childToggleCallback: React.MouseEventHandler<HTMLButtonElement>;
+    childMenuIsOpen: boolean;
 }
 
+function activeTopLevelMenuItem(routes: Route[], p: Location): string | null {
+    const trimmedPath = p.pathname.startsWith("/") ? p.pathname.substring(1) : p.pathname;
+    const parts = trimmedPath.split("/")
 
-function MenuItem({ displayTitle, title, icon, route }: ItemProps) {
+    if (parts.length == 0) {
+        return null
+    }
+
+    for (const r of routes) {
+        if (`/${parts[0]}` === r.path) {
+            return r.name
+        }
+    }
+
+
+    return null
+}
+
+function MenuNavLink({route, menuIsOpen, childMenuIsOpen, displayTitle, toggle, pathOverride, hideIcon}: {hideIcon?: boolean, childMenuIsOpen?: boolean, route: Route, pathOverride?: string, menuIsOpen: boolean, displayTitle: boolean, toggle?: React.ReactElement}) {
+    const finalPath = pathOverride !== undefined ? pathOverride : route.path
+    const resolved = useResolvedPath(finalPath);
+    const match = useMatch({ path: resolved.pathname, end: route.path === "/" || (menuIsOpen && childMenuIsOpen)});
+
     const titleElement = displayTitle ?
-        (<span className={styles.itemTitle}>{title ?? 'unknown'}</span>) :
+        (<span className={styles.itemTitle}>{route.display ?? 'unknown'}</span>) :
         (<></>)
 
+    const icon = !hideIcon ? (
+        <span className={styles.itemIcon}>
+            <FontAwesomeIcon icon={route.icon ?? faUnknown} />
+        </span>) : <></>
+
     return (
-        <NavLink to={route} className={({ isActive }) =>
-            isActive ? styles.activeLink : ''
-        }>
-            <li>
-                <span className={styles.itemIcon}>
-                    <FontAwesomeIcon icon={icon ?? faUnknown} />
-                </span>
-                {titleElement}
-            </li>
-        </NavLink>
+        <>
+            <NavLink to={finalPath}>
+                <div className={`${styles.itemLinkWrapper} ` + (match ? styles.activeLink : '')}>
+                        {icon}
+                        {titleElement}
+                </div>
+            </NavLink>
+            {toggle}
+        </>
     )
 }
 
-type ItemRoute = {
-    display?: string;
-    path: string;
-    icon?: IconDefinition;
+function MenuItem({ displayTitle, route, menuIsOpen, childToggleCallback, childMenuIsOpen }: ItemProps) {
+    const routesToAdd = route.children.filter((v: Route) => v.showInMenu)
+    const hasChildrenToShow = routesToAdd.length > 0
+    const childrenToggle = menuIsOpen && hasChildrenToShow ? (
+        <span onClick={childToggleCallback} className={styles.itemChildrenToggle}>
+            <FontAwesomeIcon icon={childMenuIsOpen ? faChevronUp : faChevronDown} />
+        </span>) : <></>
+
+    return (
+        <li>
+            <MenuNavLink displayTitle={displayTitle} menuIsOpen={menuIsOpen} childMenuIsOpen={childMenuIsOpen} route={route} toggle={childrenToggle} />
+            
+            {hasChildrenToShow && menuIsOpen ? (
+                <ul className={`${styles.itemChildren} ` + (childMenuIsOpen ? `${styles.itemChildrenOpen}` : '')}>
+                    {routesToAdd.map((v: Route, i: number) =>
+                        <li key={i} >
+                            <MenuNavLink 
+                                displayTitle={displayTitle} 
+                                menuIsOpen={menuIsOpen} 
+                                route={v} 
+                                pathOverride={`${route.path}/${v.path}`}
+                                hideIcon
+                            />
+                        </li>
+                    )}
+                </ul>
+            ): <></>}
+        </li>
+    )
 }
 
 type Props = {
     isOpen: boolean;
-    routes: ItemRoute[]
+    routes: Route[]
 }
 
 function Menu({ isOpen, routes }: Props) {
     const menuStyles = `${styles.menu} ${isOpen ? styles.open : styles.closed}`
+    const currentPath = useLocation();
+    const [childMenu, setChildMenu] = useState<string | null>(activeTopLevelMenuItem(routes, currentPath));
+    const toggleChildMenu = (name: string) => {
+        if (name == childMenu) {
+            setChildMenu(null)
+
+            return
+        }
+
+        setChildMenu(name)
+    }
     return (
-        <div className={menuStyles}>
+        <div id={MENU_ID} className={menuStyles}>
             <ul>
-                {routes.map((route: ItemRoute, i: number) => {
+                {routes.map((route: Route, i: number) => {
                     return (
-                        <MenuItem key={i} route={route.path} title={route.display} icon={route.icon} displayTitle={isOpen} />
+                        <MenuItem
+                            key={i}
+                            menuIsOpen={isOpen}
+                            route={route}
+                            displayTitle={isOpen}
+                            childMenuIsOpen={childMenu == route.name}
+                            childToggleCallback={(e: React.MouseEvent) => toggleChildMenu(route.name)}
+                        />
                     )
                 })}
-                {/* <MenuItem route="/" title="Home" icon={faHome} displayTitle={isOpen} />
-                <MenuItem route="/projects" title="Projects" icon={faProjects} displayTitle={isOpen} />
-                <MenuItem route="/scm-integrations" title="SCM Integrations" icon={faIntegrations} displayTitle={isOpen} />
-                <MenuItem route="/settings" title="Settings" icon={faSettings} displayTitle={isOpen} /> */}
             </ul>
         </div>
     )
+}
+
+export {
+    MENU_ID,
 }
 
 export default Menu;

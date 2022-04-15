@@ -2,15 +2,15 @@ import styles from './Header.module.css'
 import logo from './logo-dark.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars as faMenuOpen, faClose as faMenuClose } from '@fortawesome/free-solid-svg-icons'
-import { BuildBreadcrumbLinks } from '../../router';
+import { BuildBreadcrumbLinks } from '../../service/router';
 import { Link, useLocation } from 'react-router-dom'
+
+const MENU_TOGGLE_ID = "sidebar-menu-toggler"
 
 type Props = {
   menuIsOpen: boolean;
   toggleMenuCallback: () => void
 }
-
-
 
 function Header({ menuIsOpen, toggleMenuCallback }: Props) {
 
@@ -24,7 +24,7 @@ function Header({ menuIsOpen, toggleMenuCallback }: Props) {
   return (
     <div className={styles.headerWrapper}>
       <div className={styles.header}>
-        <div className={styles.menuIconWrapper}>
+        <div id={MENU_TOGGLE_ID} className={styles.menuIconWrapper}>
           <div className={styles.menuIcon}>
 
             {menuIcon}
@@ -54,6 +54,10 @@ function Header({ menuIsOpen, toggleMenuCallback }: Props) {
       </div>
     </div>
   )
+}
+
+export {
+  MENU_TOGGLE_ID,
 }
 
 export default Header;

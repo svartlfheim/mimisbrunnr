@@ -1,9 +1,8 @@
 .menu {
-    height: calc(100vh - var(--header-size));
-    /* background: var(--header-colour); */
+    height: calc(100vh - var(--header-wrapper-size));
     background: var(--header-colour);
     position: fixed;
-    top: var(--header-size);
+    top: var(--header-wrapper-size);
     left: 0;
     z-index: var(--menu-z-index);
     box-shadow: 0px 5px 5px #0003;
@@ -19,35 +18,36 @@
     width: calc(var(--menu-closed-size) - var(--menu-hpadding) - var(--menu-hpadding));
 }
 
-.menu ul {
+.menu > ul {
     padding: 0;
-    margin-top: var(--header-breadcrumbs-size);
-
+    /* margin-top: var(--header-breadcrumbs-size); */
 }
 
 .menu ul li {
-    padding: var(--menu-li-padding);
+    background: white;
+    position: relative;
+}
+
+.menu > ul > li {
     margin: 0;
+    padding: 0 var(--menu-li-padding) 0 var(--menu-li-padding);
     margin-bottom: var(--menu-li-padding);
     list-style: none;
     color: var(--logo-blue);
     width: calc(100% - var(--menu-li-padding) - var(--menu-li-padding));
     cursor: pointer;
-    height:2rem;
     border-radius: 4px;
-    
-}
-.menu ul li:not(:last-child) {
-    border-bottom: 1px solid #f1f1f1;
 }
 
-.menu .activeLink li, .menu ul li:hover {
-    background: var(--light-blue);
-    /* color: var(--header-colour); */
-}
+.itemChildrenToggle {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.25rem;
+    width:1rem;
+    height: 1rem;
+} 
 
 .itemIcon {
-    font-size: 1.5rem;
     width: calc(var(--menu-closed-size) - var(--menu-hpadding) - var(--menu-hpadding) - var(--menu-li-padding) -  var(--menu-li-padding));
     text-align: center;
     display: inline-block;
@@ -55,4 +55,41 @@
 
 .itemTitle {
     margin-left: 0.5rem;
+}
+
+.itemChildren {
+    padding: 0;
+    list-style: none;
+    height:0;
+    overflow-y: hidden;
+}
+
+.itemChildrenOpen {
+    height: auto;
+}
+
+.itemChildren > li {
+    /* the item icon size + the margin-left of itemTitle */
+    margin-top: 0.2rem;
+}
+
+.itemChildren > li > a > .itemLinkWrapper {
+    padding-left: calc(var(--menu-closed-size) - var(--menu-hpadding) - var(--menu-hpadding) - var(--menu-li-padding) -  var(--menu-li-padding) + 0.5rem);
+    
+}
+
+.itemLinkWrapper {
+    display: block;
+    position:relative;
+    padding: var(--menu-li-padding);
+    padding-right: 2rem;
+    border-radius: 3px;
+    padding-left: 0;
+}
+.itemLinkWrapper:hover, .itemLinkWrapper.activeLink {
+    background: var(--main-background-colour);
+}
+
+.itemLinkWrapper.activeLink {
+    font-weight:bold;
 }

@@ -1,10 +1,10 @@
 import React from "react";
-import NotFound from './pages/NotFound';
-import Home from './pages/Home'
-import Projects from './pages/Projects';
-import Settings from './pages/Settings';
-import OpenApiSpec from './pages/OpenApiSpec';
-import Integrations from './pages/SCMIntegrations';
+import NotFound from '../pages/NotFound';
+import Home from '../pages/Home'
+import Projects from '../pages/Projects';
+import Settings from '../pages/Settings';
+import OpenApiSpec from '../pages/OpenApiSpec';
+import Integrations from '../pages/SCMIntegrations';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 import {  } from '@fortawesome/free-solid-svg-icons'
 import { 
@@ -24,6 +24,7 @@ type Route = {
     element: React.ReactElement;
     icon?: IconDefinition;
     children: Route[];
+    showInMenu?: boolean;
     buildBreadcrumbs: (self: Route, part: string, previousCrumbs: Breadcrumb) => Breadcrumb[] | null
 }
 
@@ -97,6 +98,26 @@ const routes: Route[] = [
             return null
         },
         children: [
+            {
+                path: "add",
+                name: "projects.add",
+                element: <NotFound />,
+                display: "+ Add",
+                showInMenu: true,
+                buildBreadcrumbs: (self, part, previous) => {
+                    if (part === "add") {
+                        return [
+                            {
+                                path: `${previous.path}/${part}`,
+                                title: "+ Add",
+                            }
+                        ];
+                    }
+        
+                    return null
+                },
+                children: [],
+            },
             {
                 path: ":projectID",
                 name: "projects.view",
@@ -172,7 +193,28 @@ const routes: Route[] = [
         element: <Integrations />,
         display: "Integrations",
         icon: faIntegrations,
-        children: [],
+        children: [
+            {
+                path: "add",
+                name: "integrations.add",
+                element: <NotFound />,
+                display: "+ Add",
+                showInMenu: true,
+                buildBreadcrumbs: (self, part, previous) => {
+                    if (part === "add") {
+                        return [
+                            {
+                                path: `${previous.path}/${part}`,
+                                title: "+ Add",
+                            }
+                        ];
+                    }
+        
+                    return null
+                },
+                children: [],
+            },
+        ],
         buildBreadcrumbs: (self, part, previous) => {
             if (part === "integrations") {
                 return [
@@ -216,7 +258,9 @@ const routes: Route[] = [
             {
                 path: "openapi",
                 name: "help.openapi",
+                display: "OpenAPI Spec",
                 element: <OpenApiSpec />,
+                showInMenu: true,
                 buildBreadcrumbs: (self, part, previous) => {
                     if (part === "openapi") {
                         return [
@@ -268,6 +312,10 @@ const BuildBreadcrumbLinks = (path: Location): Breadcrumb[] => {
 
     return breadcrumbsFromRoutes(routes, parts, [])
 }
+
+// const isRouteActive = (r: string, path: Location): boolean {
+
+// }
 
 export type { 
     Route,
