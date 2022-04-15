@@ -1,0 +1,1303 @@
+{
+  "components": {
+    "responses": {
+      "bad_input": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_body"
+            }
+          }
+        },
+        "description": "The request could not be parsed correctly by the server."
+      },
+      "create_project_v1_invalid": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "validation_errors": [
+                  {
+                    "path": "scm_integration_id",
+                    "message": "must be a valid uuid",
+                    "params": {},
+                    "rule": "uuid"
+                  },
+                  {
+                    "path": "scm_integration_id",
+                    "message": "must already exist",
+                    "params": {},
+                    "rule": "exists"
+                  },
+                  {
+                    "path": "scm_integration_id",
+                    "message": "is required",
+                    "params": {},
+                    "rule": "required"
+                  },
+                  {
+                    "path": "name",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "name",
+                    "message": "value must be unique across all records of this type",
+                    "params": {},
+                    "rule": "unique"
+                  },
+                  {
+                    "path": "name",
+                    "message": "is required",
+                    "params": {},
+                    "rule": "required"
+                  },
+                  {
+                    "path": "path",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "path",
+                    "message": "value must be unique across all records of this type with the same value for: scm_integration_id",
+                    "params": {
+                      "field": "scm_integration_id"
+                    },
+                    "rule": "uniqueperotherfield"
+                  },
+                  {
+                    "path": "path",
+                    "message": "is required",
+                    "params": {},
+                    "rule": "required"
+                  }
+                ]
+              },
+              "properties": {
+                "validation_errors": {
+                  "$ref": "#/components/schemas/validation_error"
+                }
+              }
+            }
+          }
+        },
+        "description": "The data submitted in the request was invalid. The example shows all possible validation errors for this request. Each response may contain one or more of these."
+      },
+      "create_project_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/project_v1"
+                }
+              }
+            }
+          }
+        },
+        "description": "The created project."
+      },
+      "create_scm_integration_v1_invalid": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "validation_errors": [
+                  {
+                    "path": "name",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "name",
+                    "message": "value must be unique across all records of this type",
+                    "params": {},
+                    "rule": "unique"
+                  },
+                  {
+                    "path": "name",
+                    "message": "is required",
+                    "params": {},
+                    "rule": "required"
+                  },
+                  {
+                    "path": "type",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "type",
+                    "message": "is required",
+                    "params": {},
+                    "rule": "required"
+                  },
+                  {
+                    "path": "type",
+                    "message": "invalid choice, must be one of the options",
+                    "params": {
+                      "options": "github, gitlab"
+                    },
+                    "rule": "scmintegrationtype"
+                  },
+                  {
+                    "path": "endpoint",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "endpoint",
+                    "message": "is required",
+                    "params": {},
+                    "rule": "required"
+                  },
+                  {
+                    "path": "token",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "token",
+                    "message": "is required",
+                    "params": {},
+                    "rule": "required"
+                  }
+                ]
+              },
+              "properties": {
+                "validation_errors": {
+                  "$ref": "#/components/schemas/validation_error"
+                }
+              }
+            }
+          }
+        },
+        "description": "The data submitted in the request was invalid. The example shows all possible validation errors for this request. Each response may contain one or more of these."
+      },
+      "create_scm_integration_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/scm_integration_v1"
+                }
+              }
+            }
+          }
+        },
+        "description": "The created SCM Integration."
+      },
+      "delete_project_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/project_v1"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns the deleted project."
+      },
+      "delete_scm_integration_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/scm_integration_v1"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns the deleted SCM Integration."
+      },
+      "get_project_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/project_v1"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns the project."
+      },
+      "get_scm_integration_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/scm_integration_v1"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns the deleted SCM Integration."
+      },
+      "internal_server_error": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_body"
+            }
+          }
+        },
+        "description": "An internal error occurred, and there is nothing you can do."
+      },
+      "list_projects_v1_invalid": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "validation_errors": [
+                  {
+                    "path": "page",
+                    "message": "must be less than or equal to {max page}",
+                    "params": {
+                      "limit": "{max page}"
+                    },
+                    "rule": "lte"
+                  },
+                  {
+                    "path": "page",
+                    "message": "must be larger than 0",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "limit",
+                    "message": "must be larger than 0",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "limit",
+                    "message": "must be less than or equal to 100",
+                    "params": {
+                      "limit": "100"
+                    },
+                    "rule": "lte"
+                  }
+                ]
+              },
+              "properties": {
+                "validation_errors": {
+                  "$ref": "#/components/schemas/validation_error"
+                }
+              }
+            }
+          }
+        },
+        "description": "The data submitted in the request was invalid. The example shows all possible validation errors for this request. Each response may contain one or more of these."
+      },
+      "list_projects_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/project_v1_list"
+                },
+                "meta": {
+                  "properties": {
+                    "pagination": {
+                      "$ref": "#/components/schemas/pagination_response_meta"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "A list of all available projects within the bounds of the current page and limit selections."
+      },
+      "list_scm_integrations_v1_invalid": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "validation_errors": [
+                  {
+                    "path": "page",
+                    "message": "must be less than or equal to {max page}",
+                    "params": {
+                      "limit": "{max page}"
+                    },
+                    "rule": "lte"
+                  },
+                  {
+                    "path": "page",
+                    "message": "must be larger than 0",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "limit",
+                    "message": "must be larger than 0",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "limit",
+                    "message": "must be less than or equal to 100",
+                    "params": {
+                      "limit": "100"
+                    },
+                    "rule": "lte"
+                  }
+                ]
+              },
+              "properties": {
+                "validation_errors": {
+                  "$ref": "#/components/schemas/validation_error"
+                }
+              }
+            }
+          }
+        },
+        "description": "The data submitted in the request was invalid. The example shows all possible validation errors for this request. Each response may contain one or more of these."
+      },
+      "list_scm_integrations_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/scm_integration_v1_list"
+                },
+                "meta": {
+                  "properties": {
+                    "pagination": {
+                      "$ref": "#/components/schemas/pagination_response_meta"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "A list of all available projects within the bounds of the current page and limit selections."
+      },
+      "not_found": {
+        "description": "You requested a resource that does not exist."
+      },
+      "unsupported_media_type": {
+        "description": "You requested an unsupported content type.\n\nEnsure your request has the correct `Content-Type` header, `application/json` is the most supported."
+      },
+      "update_project_v1_invalid": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "validation_errors": [
+                  {
+                    "path": "scm_integration_id",
+                    "message": "must be a valid uuid",
+                    "params": {},
+                    "rule": "uuid"
+                  },
+                  {
+                    "path": "scm_integration_id",
+                    "message": "must already exist",
+                    "params": {},
+                    "rule": "exists"
+                  },
+                  {
+                    "path": "name",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "name",
+                    "message": "value must be unique across all records of this type",
+                    "params": {},
+                    "rule": "unique"
+                  },
+                  {
+                    "path": "path",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "path",
+                    "message": "value must be unique across all records of this type with the same value for: scm_integration_id",
+                    "params": {
+                      "field": "scm_integration_id"
+                    },
+                    "rule": "uniqueperotherfield"
+                  }
+                ]
+              },
+              "properties": {
+                "validation_errors": {
+                  "$ref": "#/components/schemas/validation_error"
+                }
+              }
+            }
+          }
+        },
+        "description": "The data submitted in the request was invalid. The example shows all possible validation errors for this request. Each response may contain one or more of these."
+      },
+      "update_project_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/project_v1"
+                },
+                "meta": {
+                  "description": "The names of the fields that were changed; if empty nothing was changed.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "The updated project, and a list of changed fields in meta.\n\nThis response is returned in the event that no changes were required; when the submitted data was the same as currently present in the system.\n"
+      },
+      "update_scm_integration_v1_invalid": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "validation_errors": [
+                  {
+                    "path": "name",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "name",
+                    "message": "value must be unique across all records of this type",
+                    "params": {},
+                    "rule": "unique"
+                  },
+                  {
+                    "path": "type",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "type",
+                    "message": "invalid choice, must be one of the options",
+                    "params": {
+                      "options": "github, gitlab"
+                    },
+                    "rule": "scmintegrationtype"
+                  },
+                  {
+                    "path": "endpoint",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  },
+                  {
+                    "path": "token",
+                    "message": "must contain more than 0 characters",
+                    "params": {
+                      "limit": "0"
+                    },
+                    "rule": "gt"
+                  }
+                ]
+              },
+              "properties": {
+                "validation_errors": {
+                  "$ref": "#/components/schemas/validation_error"
+                }
+              }
+            }
+          }
+        },
+        "description": "The data submitted in the request was invalid. The example shows all possible validation errors for this request. Each response may contain one or more of these."
+      },
+      "update_scm_integration_v1_ok": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/scm_integration_v1"
+                }
+              }
+            }
+          }
+        },
+        "description": "The updated SCM Integration."
+      }
+    },
+    "schemas": {
+      "add_project_v1_request_body": {
+        "description": "The name must be unique across all projects.\n\nThe path has a few quirks worth noting.\n\nFirstly, it must be unique within the integration it is assigned to. An integration may have many projects, but no project within the integration may share the same path.\n\nSecondly, it should represent the path in the SCM tool, that the repository project can be accessed on. For example if you're integration is for github, and the project repository is found at 'https://github.com/myorg/myrepo', the path here should be 'myorg/myrepo'.",
+        "example": {
+          "scm_integration_id": "bd8fd0c3-f1cb-4a31-96ad-61336753b09b",
+          "name": "My awesome project",
+          "path": "myorg/myrepo"
+        },
+        "properties": {
+          "name": {
+            "description": "**MUST** be unique across all projects.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "description": "**MUST** be unique per the `scm_integration_id` given.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "scm_integration_id": {
+            "description": "**MUST** already exist in the system.",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "path",
+          "scm_integration_id"
+        ],
+        "title": "Request Body - Create Project V1",
+        "type": "object"
+      },
+      "add_scm_integration_v1_request_body": {
+        "description": "The name must be unique across all SCM integrations.",
+        "example": {
+          "name": "My private gitlab",
+          "type": "gitlab",
+          "endpoint": "private.gitlab.com",
+          "token": "mysupersecrettoken"
+        },
+        "properties": {
+          "endpoint": {
+            "description": "The http endpoint to use for API requests.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "**MUST** be unique across all SCM Integrations.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "token": {
+            "description": "The access token to use for authentication with the API.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/scm_integration_type"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "token",
+          "endpoint"
+        ],
+        "title": "Request Body - Create SCM integration V1",
+        "type": "object"
+      },
+      "error_body": {
+        "properties": {
+          "errors": {
+            "example": [
+              "possible extra information, that may help with debugging"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "message": {
+            "example": "Whoopsie, something went wrong!",
+            "type": "string"
+          }
+        },
+        "title": "Response Body - Error"
+      },
+      "pagination_response_meta": {
+        "properties": {
+          "count": {
+            "description": "The amount of results actually included in this page.",
+            "type": "integer"
+          },
+          "page": {
+            "description": "The current page of results",
+            "type": "integer"
+          },
+          "per_page": {
+            "description": "The maximum amount of results being displayed per page.",
+            "type": "integer"
+          },
+          "total": {
+            "description": "The total amount of results in the system.",
+            "type": "integer"
+          }
+        },
+        "title": "Type - Pagination Meta"
+      },
+      "project_v1": {
+        "example": {
+          "id": "ef5dd634-d913-48e8-b4b3-5f06da6ce6e2",
+          "name": "My project",
+          "path": "myorg/myrepo",
+          "scm_integration": {
+            "id": "93259ede-a700-4756-a383-e242bb431828",
+            "name": "Public Github",
+            "type": "github",
+            "endpoint": "https://github.com",
+            "token": "mysupersecrettoken",
+            "created_at": "2006-01-02T15:04:05Z07:00",
+            "updated_at": "2006-01-02T15:04:05Z07:00"
+          },
+          "created_at": "2006-01-02T15:04:05Z07:00",
+          "updated_at": "2006-01-02T15:04:05Z07:00"
+        },
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "scm_integration": {
+            "$ref": "#/components/schemas/scm_integration_v1"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "title": "Type - Project (V1)",
+        "type": "object"
+      },
+      "project_v1_list": {
+        "items": {
+          "$ref": "#/components/schemas/project_v1"
+        },
+        "title": "Type - Project (V1) List",
+        "type": "array"
+      },
+      "scm_integration_type": {
+        "enum": [
+          "github",
+          "gitlab"
+        ],
+        "title": "Type - SCM Integration Type (enum)",
+        "type": "string"
+      },
+      "scm_integration_v1": {
+        "example": {
+          "id": "c21b0469-7758-4d90-bbae-7b1d2831735e",
+          "name": "Public Github",
+          "type": "github",
+          "endpoint": "https://github.com",
+          "token": "mysupersecrettoken",
+          "created_at": "2006-01-02T15:04:05Z07:00",
+          "updated_at": "2006-01-02T15:04:05Z07:00"
+        },
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/scm_integration_type"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "title": "Type - SCM Integration (V1)",
+        "type": "object"
+      },
+      "scm_integration_v1_list": {
+        "items": {
+          "$ref": "#/components/schemas/scm_integration_v1"
+        },
+        "title": "Type - SCM Integration List (V1)",
+        "type": "array"
+      },
+      "update_project_v1_request_body": {
+        "description": "The name must be unique across all projects.\n\nThe path has a few quirks worth noting.\n\nFirstly, it must be unique within the integration it is assigned to. An integration may have many projects, but no project within the integration may share the same path.\n\nSecondly, it should represent the path in the SCM tool, that the repository project can be accessed on. For example if you're integration is for github, and the project repository is found at 'https://github.com/myorg/myrepo', the path here should be 'myorg/myrepo'.\n\n---\n\nOmmitted fields are completely ignored by the system, not removed. If a value is not supplied it will simply be left as-is.",
+        "example": {
+          "scm_integration_id": "cea69735-78a4-4e5d-abd4-da6f8bfc1029",
+          "name": "My awesome project",
+          "path": "myorg/myrepo"
+        },
+        "properties": {
+          "name": {
+            "description": "**MUST** be unique across all projects.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "description": "**MUST** be unique per the `scm_integration_id` given.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "scm_integration_id": {
+            "description": "**MUST** already exist in the system.",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "type": "string"
+          }
+        },
+        "title": "Request Body - Update Project V1",
+        "type": "object"
+      },
+      "update_scm_integration_v1_request_body": {
+        "description": "The name must be unique across all SCM integrations.",
+        "example": {
+          "name": "My private gitlab",
+          "type": "gitlab",
+          "endpoint": "private.gitlab.com",
+          "token": "mysupersecrettoken"
+        },
+        "properties": {
+          "endpoint": {
+            "description": "The http endpoint to use for API requests.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "**MUST** be unique across all SCM Integrations.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "token": {
+            "description": "The access token to use for authentication with the API.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/scm_integration_type"
+          }
+        },
+        "title": "Request Body - Update SCM integration V1",
+        "type": "object"
+      },
+      "validation_error": {
+        "items": {
+          "properties": {
+            "message": {
+              "description": "A human-readable message that explains the problem.",
+              "type": "string"
+            },
+            "params": {
+              "discriminator": {
+                "mapping": {
+                  "exists": "#/components/schemas/validation_error_empty_params",
+                  "gt": "#/components/schemas/validation_error_limit_params",
+                  "gte": "#/components/schemas/validation_error_limit_params",
+                  "lt": "#/components/schemas/validation_error_limit_params",
+                  "lte": "#/components/schemas/validation_error_limit_params",
+                  "required": "#/components/schemas/validation_error_empty_params",
+                  "unique": "#/components/schemas/validation_error_empty_params",
+                  "uniqueperotherfield": "#/components/schemas/validation_error_uniqueperotherfield_params",
+                  "uuid": "#/components/schemas/validation_error_empty_params"
+                },
+                "propertyName": "rule"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/validation_error_limit_params"
+                },
+                {
+                  "$ref": "#/components/schemas/validation_error_uniqueperotherfield_params"
+                },
+                {
+                  "$ref": "#/components/schemas/validation_error_empty_params"
+                }
+              ]
+            },
+            "path": {
+              "description": "The name of the field for which this rule failed.",
+              "type": "string"
+            },
+            "rule": {
+              "description": "The name of the rule. Is machine-readable, so can be used to provide custom messages if the message does not suffice.\n\n**required**: The field must be supplied in the request.\n\n**lt**: For strings, the value must be shorter than the limit. For ints, the value must be smaller than the limit. 'limit' will be shown in the params field.\n\n**lte**: For strings, the value must be shorter than or of equal length to the limit. For ints, the value must be smaller than or equal to the limit. 'limit' will be shown in the params field.\n\n**gt**: For strings, the value must be longer than the limit. For ints, the value must be larger than the limit. 'limit' will be shown in the params field.\n\n**gte**: For strings, the value must be longer than or of equal length to the limit. For ints, the value must be larger than or equal to the limit. 'limit' will be shown in the params field.\n\n**uuid**: The value must be a valid uuid.\n\n**exists**: The record being referenced must exist, typically used on a relationship definition.\n\n**unique**: This value for this field must be unique across all of the records of this type.\n\n**uniqueperotherfield**: This value for this field must be unique across all of the records of this type that share the same value for the field shown in the error message. 'field' will be shown in the params field, and shows the name of the field which this value must be unique across.\n",
+              "enum": [
+                "required",
+                "lt",
+                "lte",
+                "gt",
+                "gte",
+                "uuid",
+                "exists",
+                "unique",
+                "uniqueperotherfield"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "title": "Type - Validation Error",
+        "type": "array"
+      },
+      "validation_error_empty_params": {
+        "description": "Given for the following validation rules:\n- unique\n- required\n- exists\n- uuid",
+        "title": "Type - (Validation Error Params) Empty",
+        "type": "object"
+      },
+      "validation_error_limit_params": {
+        "description": "Given for the following validation rules:\n- lt\n- lte\n- gt\n- gte",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          }
+        },
+        "title": "Type - (Validation Error Params) Numerically limited",
+        "type": "object"
+      },
+      "validation_error_uniqueperotherfield_params": {
+        "description": "Given for the following validation rules: \n- uniqueperotherfield",
+        "properties": {
+          "field": {
+            "type": "string"
+          }
+        },
+        "title": "Type - (Validation Error Params) Linked to other field",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Mimisbrunnr",
+    "version": "v1"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/projects": {
+      "get": {
+        "description": "Returns a list of all projects respecting the given limit and page query values.\n\nEach project will include the serialised representation of the SCM Integration it is associated with.\n\nThe 'meta' section contains information about pagination to help with building UIs.\n\nThe {max page} value is calculated at runtime, and therefore cannot be included here. The maximum page value will be calculated based on the amount of records in the system and the defined limit (ceil(total/limit)). If you choose a page beyond this value you will see the validation error shown in the example 422 response.",
+        "parameters": [
+          {
+            "description": "The page of results to show.",
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The amount of results to show per page.",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/list_projects_v1_ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_input"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "422": {
+            "$ref": "#/components/responses/list_projects_v1_invalid"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new project defined by the request body.\n\nThe chosen SCM integration ID must match an existing record, see: `GET v{apiVersion}/scm-integrations`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/add_project_v1_request_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/create_project_v1_ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_input"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "422": {
+            "$ref": "#/components/responses/create_project_v1_invalid"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      }
+    },
+    "/v1/projects/{id}": {
+      "delete": {
+        "description": "Deletes the project with the specified id.",
+        "parameters": [
+          {
+            "description": "The id of the project to delete.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "**MUST** exist in the system.",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/delete_project_v1_ok"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      },
+      "get": {
+        "description": "Gets the project with the specified id.",
+        "parameters": [
+          {
+            "description": "The id of the project to get.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "**MUST** exist in the system.",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/get_project_v1_ok"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates a new project defined by the request body.\n\nThe chosen SCM integration ID must match an existing record, see: `GET v{apiVersion}/scm-integrations`.",
+        "parameters": [
+          {
+            "description": "The id of the project to update.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "**MUST** exist in the system.",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/update_project_v1_request_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/update_project_v1_ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_input"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "422": {
+            "$ref": "#/components/responses/update_project_v1_invalid"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      }
+    },
+    "/v1/scm-integrations": {
+      "get": {
+        "description": "Returns a list of all SCM integrations respecting the given limit and page query values.\n\nThe 'meta' section contains information about pagination to help with building UIs.\n\nThe {max page} value is calculated at runtime, and therefore cannot be included here. The maximum page value will be calculated based on the amount of records in the system and the defined limit (ceil(total/limit)). If you choose a page beyond this value you will see the validation error shown in the example 422 response.",
+        "parameters": [
+          {
+            "description": "The page of results to show.",
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The amount of results to show per page.",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/list_scm_integrations_v1_ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_input"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "422": {
+            "$ref": "#/components/responses/list_scm_integrations_v1_invalid"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates a new SCM Integration defined by the request body.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/update_scm_integration_v1_request_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/update_scm_integration_v1_ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_input"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "422": {
+            "$ref": "#/components/responses/update_scm_integration_v1_invalid"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new SCM Integration defined by the request body.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/add_scm_integration_v1_request_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/create_scm_integration_v1_ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_input"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "422": {
+            "$ref": "#/components/responses/create_scm_integration_v1_invalid"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      }
+    },
+    "/v1/scm-integrations/{id}": {
+      "delete": {
+        "description": "Deletes the SCM Integration with the specified id.",
+        "parameters": [
+          {
+            "description": "The id of the SCM Integration to delete.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "**MUST** exist in the system.",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/delete_scm_integration_v1_ok"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      },
+      "get": {
+        "description": "Deletes the SCM Integration with the specified id.",
+        "parameters": [
+          {
+            "description": "The id of the SCM Integration to delete.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "**MUST** exist in the system.",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/get_scm_integration_v1_ok"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "Local development environment",
+      "url": "https://mimisbrunnr.local/api"
+    }
+  ]
+}

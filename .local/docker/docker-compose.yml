@@ -78,7 +78,6 @@ services:
       ITEST_MIMISBRUNNR_RDB_MIGRATIONS_PASSWORD: ${TEST_POSTGRESS_MIGRATIONS_DB_USER_PASSWORD}
     volumes:
       - ../../backend:/go/src/app-dev
-      - ../../frontend/packages/app/lib:/var/www/static/js
     labels:
       - "traefik.http.routers.backend.rule=Host(`mimisbrunnr.local`) && (PathPrefix(`/api`) || PathPrefix(`/static/openapi`))"
       - "traefik.http.routers.backend.priority=2"
@@ -109,9 +108,12 @@ services:
       context: ./frontend
       target: dev
     working_dir: /srv
+    environment:
+      OPENAPI_SPEC_PATH: /var/openapi/openapi.json
     volumes:
       - "~/.gitconfig:/root/.gitconfig"
       - "../../frontend:/srv"
+      - "../../docs/openapi.json:/var/openapi/openapi.json"
     labels:
       - "traefik.http.routers.frontend.rule=Host(`mimisbrunnr.local`)"
       - "traefik.http.routers.frontend.priority=1"
@@ -119,3 +121,20 @@ services:
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontend.tls=true"
+
+  # gen-api-client:
+  #   profiles:
+  #     - manual
+  #   image:
+  #     openapitools/openapi-generator-cli
+  #   command:
+  #     - generate
+  #     - -i
+  #     - /srv/in/openapi.json
+  #     - -g
+  #     - typescript-fetch
+  #     - -o
+  #     - /srv/out/
+  #   volumes:
+  #     - "../../frontend/api-client/src/fetch:/srv/out"
+  #     - "../../docs/openapi.json:/srv/in/openapi.json"

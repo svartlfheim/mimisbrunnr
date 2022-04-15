@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+        "composite": true,
+        "declaration": true,
+        "declarationDir": "./types",
+        "outDir": "./lib/",
+        "noImplicitAny": true,
+        "module": "esnext",
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true,
+        "moduleResolution": "node",
+        "typeRoots": [
+            "node_modules/@types",
+            "../node_modules/@types",
+            "src/types"
+        ]
+    },
+    "lib": [
+        "dom",
+    ],
+    "include": [
+        "src/**/*"
+    ]
+}

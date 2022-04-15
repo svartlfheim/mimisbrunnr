@@ -161,6 +161,16 @@ show-compose: ## Show the generated compose config after all merges
 clear-storage: ## Clear any local storage for the environment
 	rm -rf ./.local/docker/storage/*
 
+# --- generators --- #
+.PHONY: gen-openapi
+gen-openapi: ## Generates an openapi spec for the backend api (in docs/openapi.json).
+	$(DOCKER_COMPOSE) exec backend mmbrnr docs openapi > docs/openapi.json
+
+.PHONY: gen-api-client
+gen-api-client: gen-openapi ## Generates the frontend API client in typesript.
+	$(DOCKER_COMPOSE) exec frontend yarn api-client gen-client
+# $(DOCKER_COMPOSE) run --rm gen-api-client
+
 # --- utils --- #
 .PHONY: show-compose-command
 show-compose-command: ## Outputs the base docker compose command used to interact with the environment
