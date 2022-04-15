@@ -2554,7 +2554,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.11.26":
+"@types/node@npm:^16.11.27":
   version: 16.11.27
   resolution: "@types/node@npm:16.11.27"
   checksum: 6ed0c8c4d29a549d0cfd607d19edf9a4668fbd39087701d923b4a04cd760564e47ad27f9403968cb9c11ee006f0ea6ab698b2491b4b2d2dec3f4a53d0fc22df7
@@ -2603,7 +2603,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.0.0":
+"@types/react-dom@npm:^18.0.0, @types/react-dom@npm:^18.0.1":
   version: 18.0.1
   resolution: "@types/react-dom@npm:18.0.1"
   dependencies:
@@ -2612,7 +2612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.0.3":
+"@types/react@npm:*, @types/react@npm:^18.0.5":
   version: 18.0.5
   resolution: "@types/react@npm:18.0.5"
   dependencies:
@@ -3308,7 +3308,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"api-client@0.0.1, api-client@workspace:api-client":
+"api-client@workspace:api-client":
   version: 0.0.0-use.local
   resolution: "api-client@workspace:api-client"
   dependencies:
@@ -3330,17 +3330,15 @@ __metadata:
     "@testing-library/react": ^13.0.1
     "@testing-library/user-event": ^13.5.0
     "@types/jest": ^27.4.1
-    "@types/node": ^16.11.26
-    "@types/react": ^18.0.3
-    "@types/react-dom": ^18.0.0
-    api-client: 0.0.1
+    "@types/node": ^16.11.27
+    "@types/react": ^18.0.5
+    "@types/react-dom": ^18.0.1
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.3.0
     react-scripts: 5.0.1
     typescript: ^4.6.3
     web-vitals: ^2.1.4
-    webpack: ^5.0.0
   languageName: unknown
   linkType: soft
 
@@ -5112,9 +5110,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.84":
-  version: 1.4.108
-  resolution: "electron-to-chromium@npm:1.4.108"
-  checksum: a89d00ad7cf76d73285018f851f091c5cba3c7dc7cd5e7dd68c1d82bc07dd77d61fe7a2212383e2457b4deee5d2fe1097f826bb23a5b91fd1877e6569c6e9d7b
+  version: 1.4.109
+  resolution: "electron-to-chromium@npm:1.4.109"
+  checksum: 67e082a3d9fa314b4213adce16bd4d072a2a573ff58c767c228a39e268d805b0e55bbcaf72d0cb7ae8a19ae6f7019b5f020170df47f23347b10180230f837c59
   languageName: node
   linkType: hard
 
