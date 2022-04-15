@@ -30,7 +30,6 @@
         "url": "https://github.com/svartlfheim/mimisbrunnr/issues"
     },
     "devDependencies": {
-        "openapi-typescript-codegen": "^0.21.0",
         "ts-loader": "^9.2.8",
         "typescript": "^4.6.3",
         "webpack": "^5.0.0",
