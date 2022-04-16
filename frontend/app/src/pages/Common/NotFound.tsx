@@ -1,4 +1,4 @@
-import Base from './Base'
+import {Base} from './Base'
 
 function NotFound() {
     return (
@@ -8,4 +8,6 @@ function NotFound() {
     )
 }
 
-export default NotFound;
+export {
+    NotFound,
+}

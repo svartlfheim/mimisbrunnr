@@ -1,0 +1,21 @@
+.panel {
+    box-sizing: border-box;
+
+
+    /* background: var(--frame-colour); */
+    /* border: 1px solid var(--frame-colour); */
+    /* border-radius: 5px; */
+}
+
+.panel.padded {
+    padding: 1rem;
+}
+
+.panel.light {
+    background: white;
+    border: 1px solid var(--frame-colour);
+}
+
+.fullSize {
+    grid-column: 1 / -1;
+}

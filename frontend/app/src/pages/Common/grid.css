@@ -1,0 +1,49 @@
+/* .one {
+    padding-top:2rem;
+    grid-column: 1 / -1;
+}
+.one .title {
+    width: 100%;
+    position: absolute;
+    height: 2rem;
+    left: 0;
+    top:0;
+    background: rgb(168, 255, 168);
+
+} */
+
+/* .one {
+    grid-column: 1;
+    grid-row: 1;
+    border: 2px solid purple;
+}
+
+.two {
+    grid-column: 2 / 4;
+    grid-row: 1 / 3;
+    border: 2px solid green;
+}
+
+.three {
+    grid-column: 1;
+    grid-row: 2 / 5;
+    border: 2px solid blue;
+}
+
+.four {
+    grid-column: 3;
+    grid-row: 3;
+    border: 2px solid yellow;
+}
+
+.five {
+    grid-column: 2;
+    grid-row: 4;
+    border: 2px solid orange;
+}
+
+.six {
+    grid-column: 3;
+    grid-row: 4;
+    border: 2px solid teal;
+} */

@@ -1,8 +1,8 @@
 import styles from './Header.module.css'
-import logo from './logo-dark.png'
+import logo from './logo-white.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars as faMenuOpen, faClose as faMenuClose } from '@fortawesome/free-solid-svg-icons'
-import { BuildBreadcrumbLinks } from '../../service/router';
+import { BuildBreadcrumbLinks } from '../../Service/router';
 import { Link, useLocation } from 'react-router-dom'
 
 const MENU_TOGGLE_ID = "sidebar-menu-toggler"
@@ -34,7 +34,7 @@ function Header({ menuIsOpen, toggleMenuCallback }: Props) {
           <img className={styles.logoImg} src={logo} alt="Logo" />
         </div>
       </div>
-      <div className={styles.breadcrumbs}>
+      {/* <div className={styles.breadcrumbs}>
         <ul>
           {bcLinks.map((l: {
             path: string;
@@ -51,13 +51,14 @@ function Header({ menuIsOpen, toggleMenuCallback }: Props) {
             return elements;
           })}
         </ul>
-      </div>
+      </div> */}
     </div>
   )
 }
 
 export {
   MENU_TOGGLE_ID,
+  Header,
 }
 
 export default Header;

@@ -1,12 +1,6 @@
 import React from "react";
-import NotFound from '../pages/NotFound';
-import Home from '../pages/Home'
-import Projects from '../pages/Projects';
-import Settings from '../pages/Settings';
-import OpenApiSpec from '../pages/OpenApiSpec';
-import Integrations from '../pages/SCMIntegrations';
+import * as pages from '../Pages'
 import { IconDefinition } from '@fortawesome/fontawesome-common-types'
-import {  } from '@fortawesome/free-solid-svg-icons'
 import { 
     faHome as faHome,
     faCodeBranch as faIntegrations,
@@ -73,7 +67,7 @@ const routes: Route[] = [
     {
         path: "/",
         name: "home",
-        element: <Home />,
+        element: <pages.Home />,
         display: "Home",
         icon: faHome,
         children: [],
@@ -82,7 +76,7 @@ const routes: Route[] = [
     {
         path: "/projects",
         name: "projects",
-        element: <Projects />,
+        element: <pages.ProjectList />,
         display: "Projects",
         icon: faProjects,
         buildBreadcrumbs: (self, part, previous) => {
@@ -101,7 +95,7 @@ const routes: Route[] = [
             {
                 path: "add",
                 name: "projects.add",
-                element: <NotFound />,
+                element: <pages.AddProject />,
                 display: "+ Add",
                 showInMenu: true,
                 buildBreadcrumbs: (self, part, previous) => {
@@ -121,7 +115,7 @@ const routes: Route[] = [
             {
                 path: ":projectID",
                 name: "projects.view",
-                element: <NotFound />,
+                element: <pages.ViewProject />,
                 buildBreadcrumbs: (self, part, previous) => {
                     if (part !== "") {
                         return [
@@ -138,7 +132,7 @@ const routes: Route[] = [
                     {
                         path: "docs",
                         name: "projects.view.docs",
-                        element: <NotFound />,
+                        element: <pages.ViewProjectDocumentation />,
                         buildBreadcrumbs: (self, part, previous) => {
                             if (part === "docs") {
                                 return [
@@ -155,7 +149,7 @@ const routes: Route[] = [
                             {
                                 path: "*",
                                 name: "projects.view.docs.page",
-                                element: <NotFound />,
+                                element: <pages.ViewProjectDocumentation />,
                                 buildBreadcrumbs: (self, part, previous) => {
                                     const bcs: Breadcrumb[] = []
                                     const parts = part.split("/").filter((s) => s !== '')
@@ -190,14 +184,14 @@ const routes: Route[] = [
     {
         path: "/integrations",
         name: "integrations",
-        element: <Integrations />,
+        element: <pages.SCMIntegrationList />,
         display: "Integrations",
         icon: faIntegrations,
         children: [
             {
                 path: "add",
                 name: "integrations.add",
-                element: <NotFound />,
+                element: <pages.AddSCMIntegration />,
                 display: "+ Add",
                 showInMenu: true,
                 buildBreadcrumbs: (self, part, previous) => {
@@ -231,7 +225,7 @@ const routes: Route[] = [
     {
         path: "/settings",
         name: "settings",
-        element: <Settings />,
+        element: <pages.SettingsDashboard />,
         display: "Settings",
         icon: faSettings,
         children: [],
@@ -251,7 +245,7 @@ const routes: Route[] = [
     {
         path: "/help",
         name: "help",
-        element: <NotFound />,
+        element: <pages.HelpDashboard />,
         display: "Help?",
         icon: faHelp,
         children: [
@@ -259,7 +253,7 @@ const routes: Route[] = [
                 path: "openapi",
                 name: "help.openapi",
                 display: "OpenAPI Spec",
-                element: <OpenApiSpec />,
+                element: <pages.OpenApiSpec />,
                 showInMenu: true,
                 buildBreadcrumbs: (self, part, previous) => {
                     if (part === "openapi") {

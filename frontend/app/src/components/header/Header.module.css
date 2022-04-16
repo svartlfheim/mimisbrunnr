@@ -3,7 +3,7 @@
     top: 0;
     left: 0;
     width: 100vw;
-    height: var(--header-wrapper-size);
+    height: var(--header-size);
     z-index: var(--header-z-index);
     
 }
@@ -11,10 +11,11 @@
     position:absolute;
     top: 0;
     width: 100%;
-    background: var(--header-colour);
+    background: var(--frame-colour);
     font-size: 2.5rem;
     padding: var(--header-padding);
     height: calc(var(--header-size) - var(--header-padding) - var(--header-padding));
+    box-shadow: 0px 3px 5px #0003;
     
 }
 
@@ -24,7 +25,7 @@
     height: calc(var(--header-breadcrumbs-size)  - var(--header-padding) - var(--header-padding));
     width: calc(100vw - var(--header-padding) - var(--header-padding));
     padding: var(--header-padding) var(--header-padding) var(--header-padding) calc(var(--menu-closed-size) + var(--header-padding));
-    background: var(--logo-blue);
+    background: var(--nav-main-colour);
     overflow-x: scroll;
     white-space: nowrap;
     box-shadow: 0px 3px 5px #0003;
@@ -49,7 +50,7 @@
 }
 
 .breadcrumbs ul li:nth-child(odd):hover {
-    color: var(--logo-blue);
+    color: var(--nav-main-colour);
     background: var(--header-colour);
 }
 
@@ -72,14 +73,14 @@
     display: inline-flex;
     font-size: 1.5rem;
     padding: 2px 4px;
-    color: var(--logo-blue);
+    color: var(--nav-main-colour);
     border-radius: 5px;
     cursor: pointer;
 }
 
 .menuIcon svg:hover {
-    background: var(--light-blue);
-    /* color: var(--header-colour); */
+    background: var(--main-bg-colour);
+    color: var(--nav-highlight-colour);
 }
 
 .logo {

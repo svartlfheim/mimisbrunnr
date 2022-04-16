@@ -1,28 +1,12 @@
 import styles from './Menu.module.css'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faQuestion as faUnknown, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import { IconDefinition } from '@fortawesome/fontawesome-common-types'
-import {
-    NavLink, 
-    useLocation,
-    useMatch,
-    useResolvedPath,
-} from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import type { Location } from "history";
-import { Route } from "../../service/router"
+import { Route } from "../../Service/router"
 import { useState } from "react"
+import { Item } from './priv'
+import type {StyleProps as ItemStyles} from './priv'
 
-const MENU_ID="sidebar-menu";
-
-type ItemProps = {
-    title?: string;
-    displayTitle: boolean;
-    icon?: IconDefinition;
-    route: Route;
-    menuIsOpen: boolean;
-    childToggleCallback: React.MouseEventHandler<HTMLButtonElement>;
-    childMenuIsOpen: boolean;
-}
+const MENU_ID = "sidebar-menu";
 
 function activeTopLevelMenuItem(routes: Route[], p: Location): string | null {
     const trimmedPath = p.pathname.startsWith("/") ? p.pathname.substring(1) : p.pathname;
@@ -42,62 +26,24 @@ function activeTopLevelMenuItem(routes: Route[], p: Location): string | null {
     return null
 }
 
-function MenuNavLink({route, menuIsOpen, childMenuIsOpen, displayTitle, toggle, pathOverride, hideIcon}: {hideIcon?: boolean, childMenuIsOpen?: boolean, route: Route, pathOverride?: string, menuIsOpen: boolean, displayTitle: boolean, toggle?: React.ReactElement}) {
-    const finalPath = pathOverride !== undefined ? pathOverride : route.path
-    const resolved = useResolvedPath(finalPath);
-    const match = useMatch({ path: resolved.pathname, end: route.path === "/" || (menuIsOpen && childMenuIsOpen)});
-
-    const titleElement = displayTitle ?
-        (<span className={styles.itemTitle}>{route.display ?? 'unknown'}</span>) :
-        (<></>)
-
-    const icon = !hideIcon ? (
-        <span className={styles.itemIcon}>
-            <FontAwesomeIcon icon={route.icon ?? faUnknown} />
-        </span>) : <></>
-
-    return (
-        <>
-            <NavLink to={finalPath}>
-                <div className={`${styles.itemLinkWrapper} ` + (match ? styles.activeLink : '')}>
-                        {icon}
-                        {titleElement}
-                </div>
-            </NavLink>
-            {toggle}
-        </>
-    )
-}
-
-function MenuItem({ displayTitle, route, menuIsOpen, childToggleCallback, childMenuIsOpen }: ItemProps) {
-    const routesToAdd = route.children.filter((v: Route) => v.showInMenu)
-    const hasChildrenToShow = routesToAdd.length > 0
-    const childrenToggle = menuIsOpen && hasChildrenToShow ? (
-        <span onClick={childToggleCallback} className={styles.itemChildrenToggle}>
-            <FontAwesomeIcon icon={childMenuIsOpen ? faChevronUp : faChevronDown} />
-        </span>) : <></>
-
-    return (
-        <li>
-            <MenuNavLink displayTitle={displayTitle} menuIsOpen={menuIsOpen} childMenuIsOpen={childMenuIsOpen} route={route} toggle={childrenToggle} />
-            
-            {hasChildrenToShow && menuIsOpen ? (
-                <ul className={`${styles.itemChildren} ` + (childMenuIsOpen ? `${styles.itemChildrenOpen}` : '')}>
-                    {routesToAdd.map((v: Route, i: number) =>
-                        <li key={i} >
-                            <MenuNavLink 
-                                displayTitle={displayTitle} 
-                                menuIsOpen={menuIsOpen} 
-                                route={v} 
-                                pathOverride={`${route.path}/${v.path}`}
-                                hideIcon
-                            />
-                        </li>
-                    )}
-                </ul>
-            ): <></>}
-        </li>
-    )
+function extractItemStyles({ 
+    itemChildrenToggle, 
+    itemChildren, 
+    itemChildrenOpen, 
+    itemTitle, 
+    itemIcon, 
+    itemLinkWrapper, 
+    activeLink
+}: { readonly [key: string]: string }): ItemStyles {
+    return { 
+        itemChildrenToggle,
+        itemChildren,
+        itemChildrenOpen,
+        itemTitle,
+        itemIcon,
+        itemLinkWrapper,
+        activeLink
+    }
 }
 
 type Props = {
@@ -107,6 +53,7 @@ type Props = {
 
 function Menu({ isOpen, routes }: Props) {
     const menuStyles = `${styles.menu} ${isOpen ? styles.open : styles.closed}`
+    const itemStyles: ItemStyles = extractItemStyles(styles)
     const currentPath = useLocation();
     const [childMenu, setChildMenu] = useState<string | null>(activeTopLevelMenuItem(routes, currentPath));
     const toggleChildMenu = (name: string) => {
@@ -118,12 +65,15 @@ function Menu({ isOpen, routes }: Props) {
 
         setChildMenu(name)
     }
+    
+
     return (
         <div id={MENU_ID} className={menuStyles}>
             <ul>
                 {routes.map((route: Route, i: number) => {
                     return (
-                        <MenuItem
+                        <Item
+                            styles={itemStyles}
                             key={i}
                             menuIsOpen={isOpen}
                             route={route}
@@ -139,6 +89,7 @@ function Menu({ isOpen, routes }: Props) {
 }
 
 export {
+    Menu,
     MENU_ID,
 }
 

@@ -1,20 +1,22 @@
-import Header, {MENU_TOGGLE_ID} from '../components/header/Header'
-import Content from '../components/content/Content';
-import Menu, {MENU_ID} from '../components/menu/Menu';
+import Header, {MENU_TOGGLE_ID} from '../../Components/Header'
+import Content from '../../Components/Content';
+import Menu, {MENU_ID} from '../../Components/Menu';
 import React, { useState, useEffect } from 'react';
-import {routes} from '../service/router'
+import {routes} from '../../Service/router'
+import {Mode} from '../../Components/Content'
 
 type Props = {
-    children: React.ReactNode
+    children: React.ReactNode,
+    gridMode?: Mode
+    pageTitle?: string
 }
 
 const menuIsOpenKey = "menu-is-open" 
 
-function Base({ children }: Props) {
+function Base({ children, gridMode, pageTitle }: Props) {
 
     const [menuOpen, setMenuIsOpen] = useState(localStorage.getItem(menuIsOpenKey) === "true");
     const toggleMenu = () => {
-        console.log('toggling menu to ', !menuOpen)
         const newValue = !menuOpen
         setMenuIsOpen(!menuOpen)
         localStorage.setItem(menuIsOpenKey, newValue ? "true" : "false");
@@ -55,15 +57,18 @@ function Base({ children }: Props) {
         };
     }, [hideMenuOnContentClick]);
 
+    gridMode = gridMode === undefined ? Mode.ResponsiveColumns : gridMode
     return (
         <>
             <Header menuIsOpen={menuOpen} toggleMenuCallback={() => { toggleMenu() }} />
             <Menu isOpen={menuOpen} routes={routes} />
-            <Content>
+            <Content mode={gridMode}>
                 {children}
             </Content>
         </>
     )
 }
 
-export default Base;
+export {
+    Base
+};

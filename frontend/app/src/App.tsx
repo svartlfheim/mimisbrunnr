@@ -5,8 +5,8 @@ import {
   Route as ReactRoute,
   Link
 } from "react-router-dom";
-import {routes, Route} from './service/router'
-import NotFound from './pages/NotFound'
+import {routes, Route} from './Service/router'
+import {NotFound} from './Pages'
 
 
 function buildRoutes(r: Route, key: string, pathPrefix: string, carry: Array<React.ReactElement>) {

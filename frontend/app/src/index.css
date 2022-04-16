@@ -1,20 +1,23 @@
 @import-normalize; /* bring in normalize.css styles */
 
 :root {
-    --light-blue: #afafaf;
+    --footer-blue: #0072ff;
 
-    --main-background-colour: #eceff0;
 
-    --logo-blue: #5a5a5a;
+    --text-colour: #ffffff;
+    --frame-colour: #161a22;
+    --bg-highlight-colour: #afafaf;
+
+    --main-bg-colour: #0d1117;
+
+    --logo-blue: #2389ff;
+
+    --nav-main-colour: #afafaf;
+    --nav-highlight-colour: #ffffff;
     --header-wrapper-size: 95px;
-    /* if toolbar is enabled --header-wrapper-size: 120px; */
     --header-size: 60px;
-    --header-toolbar-size: 60px;
     --header-padding: 5px;
     --header-z-index: 500;
-    --header-colour: #ffffff;
-    --header-toolbar-colour: #ff8100;
-    --header-menu-icon-size: 30px;
     --header-breadcrumbs-size: 35px;
 
     --menu-z-index: 600;
@@ -27,8 +30,9 @@
 
 body {
     margin: 0;
-    font-family: Verdana, sans-serif;
-    background: var(--main-background-colour);
+    font-family: Arial, sans-serif;
+    background: var(--main-bg-colour);
+    color: var(--text-colour);
 }
 
 a {
