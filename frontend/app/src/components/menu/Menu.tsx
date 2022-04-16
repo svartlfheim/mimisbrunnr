@@ -12,7 +12,7 @@ function activeTopLevelMenuItem(routes: Route[], p: Location): string | null {
     const trimmedPath = p.pathname.startsWith("/") ? p.pathname.substring(1) : p.pathname;
     const parts = trimmedPath.split("/")
 
-    if (parts.length == 0) {
+    if (parts.length === 0) {
         return null
     }
 
@@ -57,7 +57,7 @@ function Menu({ isOpen, routes }: Props) {
     const currentPath = useLocation();
     const [childMenu, setChildMenu] = useState<string | null>(activeTopLevelMenuItem(routes, currentPath));
     const toggleChildMenu = (name: string) => {
-        if (name == childMenu) {
+        if (name === childMenu) {
             setChildMenu(null)
 
             return
@@ -65,7 +65,6 @@ function Menu({ isOpen, routes }: Props) {
 
         setChildMenu(name)
     }
-    
 
     return (
         <div id={MENU_ID} className={menuStyles}>
@@ -78,7 +77,7 @@ function Menu({ isOpen, routes }: Props) {
                             menuIsOpen={isOpen}
                             route={route}
                             displayTitle={isOpen}
-                            childMenuIsOpen={childMenu == route.name}
+                            childMenuIsOpen={childMenu === route.name}
                             childToggleCallback={(e: React.MouseEvent) => toggleChildMenu(route.name)}
                         />
                     )

@@ -1,5 +1,4 @@
 import styles from './Content.module.css'
-import {Panel} from '../Layout'
 
 enum Mode {
     ResponsiveColumns,

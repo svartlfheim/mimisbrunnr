@@ -2,6 +2,7 @@ import React from "react";
 import * as pages from '../Pages'
 import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 import { 
+    /* eslint-disable-next-line no-useless-rename */
     faHome as faHome,
     faCodeBranch as faIntegrations,
     faDiagramProject as faProjects,
@@ -37,7 +38,7 @@ const breadcrumbsFromRoutes: breadcrumbBuilder  = (routes: Route[], parts: strin
     }
 
     for(const route of routes) {
-        if (route.path == "*") {
+        if (route.path === "*") {
             const allParts = [firstPart].concat(parts).join("/")
 
             const bcs = route.buildBreadcrumbs(route, allParts, carry[carry.length - 1]);
