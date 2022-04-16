@@ -1,7 +1,7 @@
 @import-normalize; /* bring in normalize.css styles */
 
 :root {
-    --footer-blue: #0072ff;
+    --neutral-blue: #0072ff;
 
 
     --text-colour: #ffffff;
@@ -26,6 +26,11 @@
     --menu-li-padding: 5px;
 
     --content-padding: 1rem;
+
+    --footer-height: 40px;
+    --footer-padding: 5px;
+    --footer-z-index: 700;
+    --footer-text-size: 30px;
 }
 
 body {

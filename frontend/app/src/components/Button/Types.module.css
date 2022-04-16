@@ -1,0 +1,20 @@
+.neutral {
+    background: var(--neutral-blue);
+    color: white;
+}
+
+.danger {
+    background: red;
+    color: white;
+}
+
+.caution {
+    background: orange;
+    color: white;
+}
+
+.positive {
+    background: green;
+    color: white;
+}
+

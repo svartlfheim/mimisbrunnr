@@ -4,6 +4,7 @@ import Menu, {MENU_ID} from '../../Components/Menu';
 import React, { useState, useEffect } from 'react';
 import {routes} from '../../Service/router'
 import {Mode} from '../../Components/Content'
+import {Footer} from '../../Components/Footer'
 
 type Props = {
     children: React.ReactNode,
@@ -65,6 +66,7 @@ function Base({ children, gridMode, pageTitle }: Props) {
             <Content mode={gridMode}>
                 {children}
             </Content>
+            <Footer />
         </>
     )
 }

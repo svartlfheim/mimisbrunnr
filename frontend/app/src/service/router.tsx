@@ -37,7 +37,7 @@ const breadcrumbsFromRoutes: breadcrumbBuilder  = (routes: Route[], parts: strin
     }
 
     for(const route of routes) {
-        if (route.path == "/*") {
+        if (route.path == "*") {
             const allParts = [firstPart].concat(parts).join("/")
 
             const bcs = route.buildBreadcrumbs(route, allParts, carry[carry.length - 1]);
@@ -151,6 +151,7 @@ const routes: Route[] = [
                                 name: "projects.view.docs.page",
                                 element: <pages.ViewProjectDocumentation />,
                                 buildBreadcrumbs: (self, part, previous) => {
+                                    console.log(part)
                                     const bcs: Breadcrumb[] = []
                                     const parts = part.split("/").filter((s) => s !== '')
 
@@ -285,9 +286,12 @@ const routes: Route[] = [
     },
 ];
 
-type Breadcrumb = {
-    path: string;
-    title: string;
+const HomeRoute: Route = routes[0];
+
+interface Breadcrumb {
+    path: string,
+    title: string,
+    icon?: React.ReactElement,
 }
 
 
@@ -296,25 +300,18 @@ const BuildBreadcrumbLinks = (path: Location): Breadcrumb[] => {
         .filter((s: string) => s !== '' )
     
     if (parts.length === 0) {
-        return [
-            {
-                path: "/",
-                title: "Home",
-            }
-        ];
+        return [];
     }
 
     return breadcrumbsFromRoutes(routes, parts, [])
 }
 
-// const isRouteActive = (r: string, path: Location): boolean {
-
-// }
-
 export type { 
     Route,
+    Breadcrumb
 };
 export {
     BuildBreadcrumbLinks,
     routes,
+    HomeRoute,
 }
