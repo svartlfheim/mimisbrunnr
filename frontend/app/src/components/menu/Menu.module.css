@@ -25,6 +25,7 @@
 .menu ul li {
     background: var(--frame-colour);
     position: relative;
+    
 }
 
 .menu > ul > li {
@@ -36,6 +37,7 @@
     width: calc(100% - var(--menu-li-padding) - var(--menu-li-padding));
     cursor: pointer;
     border-radius: 4px;
+    
 }
 
 .itemChildrenToggle {
@@ -85,11 +87,45 @@
     border-radius: 3px;
     padding-left: 0;
 }
-.itemLinkWrapper:hover, .itemLinkWrapper.activeLink {
+.itemLinkWrapper:hover, .itemLinkWrapper.activeLink, .itemChildrenToggle:hover {
     background: var(--main-bg-colour);
     color: var(--nav-highlight-colour);
 }
 
 .itemLinkWrapper.activeLink {
     font-weight:bold;
+}
+
+.itemChildrenHoverList  {
+    position: fixed;
+    top: 50%;
+    left:50%;
+    z-index: 20000;
+    padding: 0;
+    list-style: none;
+    overflow-y: hidden;
+    background: var(--main-bg-colour);
+    border: 1px solid  var(--bg-highlight-colour);
+    border-radius: 5px;
+}
+
+.itemChildrenHoverList li:first-child {
+    text-align: center;
+}
+
+.itemChildrenHoverList li:first-child .itemLinkWrapper {
+    border-bottom: 1px solid var(--bg-highlight-colour);
+}
+/* Needs to be specific (.menu) to override default in .menu ul li block */
+.menu .itemChildrenHoverList li {
+    background: var(--main-bg-colour);
+}
+
+.itemChildrenHoverList li .itemLinkWrapper {
+    background: var(--main-bg-colour);
+    border-radius: 0;
+    padding-right: 0;
+    padding-left: 0;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
 }

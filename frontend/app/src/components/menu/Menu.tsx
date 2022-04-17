@@ -33,7 +33,8 @@ function extractItemStyles({
     itemTitle, 
     itemIcon, 
     itemLinkWrapper, 
-    activeLink
+    activeLink,
+    itemChildrenHoverList
 }: { readonly [key: string]: string }): ItemStyles {
     return { 
         itemChildrenToggle,
@@ -42,7 +43,8 @@ function extractItemStyles({
         itemTitle,
         itemIcon,
         itemLinkWrapper,
-        activeLink
+        activeLink,
+        itemChildrenHoverList
     }
 }
 

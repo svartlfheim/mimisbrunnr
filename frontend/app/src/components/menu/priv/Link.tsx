@@ -6,6 +6,7 @@ import {
     useResolvedPath,
 } from 'react-router-dom'
 import { Route } from "../../../Service/router"
+import React from "react"
 
 type StyleProps = {
     itemTitle: string,
@@ -22,7 +23,7 @@ interface Props {
     menuIsOpen: boolean,
     displayTitle: boolean,
     toggle?: React.ReactElement,
-    styles: StyleProps ,
+    styles: StyleProps,
 }
 
 function Link({route, menuIsOpen, childMenuIsOpen, displayTitle, toggle, pathOverride, hideIcon, styles}: Props) {
