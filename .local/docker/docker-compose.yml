@@ -1,0 +1,111 @@
+version: '3.5'
+
+services:
+  reverse-proxy:
+    image: traefik:v2.1
+    ports:
+      - "7777:7777"
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/traefik.yaml:/traefik.yaml
+      - ./traefik/traefik-dynamic-config.yaml:/traefik-dynamic-config.yaml
+      - ../certs:/certs
+
+  create-ssl-cert:
+    profiles:
+      - manual
+    build:
+      context: ./images/minica
+    working_dir: /certs
+    volumes:
+      - "../certs:/certs"
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_SCHEMA: ${APP_DB_SCHEMA}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
+      MIGRATIONS_DB_USER: ${MIGRATIONS_DB_USER}
+      MIGRATIONS_DB_USER_PASSWORD: ${MIGRATIONS_DB_USER_PASSWORD}
+    volumes: 
+      - ./storage/postgres:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+
+  testpostgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${TEST_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD}
+      APP_SCHEMA: ${TEST_POSTGRES_DB_SCHEMA}
+      APP_DB_USER: ${TEST_POSTGRES_DB_USER}
+      APP_DB_USER_PASSWORD: ${TEST_POSTGRES_DB_USER_PASSWORD}
+      MIGRATIONS_DB_USER: ${TEST_POSTGRES_MIGRATIONS_DB_USER}
+      MIGRATIONS_DB_USER_PASSWORD: ${TEST_POSTGRESS_MIGRATIONS_DB_USER_PASSWORD}
+    volumes: 
+      - ./postgres/init:/docker-entrypoint-initdb.d
+
+  backend:
+    build:
+      context: ./backend
+    working_dir: /go/src/app-dev
+    environment:
+      MIMISBRUNNR_RDB_DRIVER: ${APP_DB_DRIVER}
+      MIMISBRUNNR_RDB_HOST: ${APP_DB_HOST}
+      MIMISBRUNNR_RDB_PORT: ${APP_DB_PORT}
+      MIMISBRUNNR_RDB_USERNAME: ${APP_DB_USER}
+      MIMISBRUNNR_RDB_PASSWORD: ${APP_DB_USER_PASSWORD}
+      MIMISBRUNNR_RDB_SCHEMA: ${APP_DB_SCHEMA}
+      MIMISBRUNNR_RDB_DATABASE: ${APP_DB_DATABASE}
+      MIMISBRUNNR_RDB_MIGRATIONS_USERNAME: ${MIGRATIONS_DB_USER}
+      MIMISBRUNNR_RDB_MIGRATIONS_PASSWORD: ${MIGRATIONS_DB_USER_PASSWORD}
+      # --- INTEGRATION TEST VARS (ITEST_*) --- #
+      # The Makefile in ./backend will override this
+      CI_INTEGRATION_TESTS_ENABLED: "false"
+      ITEST_MIMISBRUNNR_RDB_DRIVER: ${TEST_POSTGRES_DB_DRIVER}
+      ITEST_MIMISBRUNNR_RDB_HOST: ${TEST_POSTGRES_DB_HOST}
+      ITEST_MIMISBRUNNR_RDB_PORT: ${TEST_POSTGRES_DB_PORT}
+      ITEST_MIMISBRUNNR_RDB_USERNAME: ${TEST_POSTGRES_DB_USER}
+      ITEST_MIMISBRUNNR_RDB_PASSWORD: ${TEST_POSTGRES_DB_USER_PASSWORD}
+      ITEST_MIMISBRUNNR_RDB_SCHEMA: ${TEST_POSTGRES_DB_SCHEMA}
+      ITEST_MIMISBRUNNR_RDB_DATABASE: ${TEST_POSTGRES_DB_DATABASE}
+      ITEST_MIMISBRUNNR_RDB_MIGRATIONS_USERNAME: ${TEST_POSTGRES_MIGRATIONS_DB_USER}
+      ITEST_MIMISBRUNNR_RDB_MIGRATIONS_PASSWORD: ${TEST_POSTGRESS_MIGRATIONS_DB_USER_PASSWORD}
+    volumes:
+      - ../../backend:/go/src/app-dev
+      - ../../static:/var/www/static
+    labels:
+      - "traefik.http.routers.backend.rule=Host(`mimisbrunnr.local`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+      - "traefik.http.routers.backend.tls=true"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    # runs on port 80
+    ports:
+      - "8989:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_USER}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    volumes:
+      - "./pgadmin/servers.json:/pgadmin4/servers.json"
+    labels:
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.local`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.pgadmin.entrypoints=web"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+      - "traefik.http.routers.pgadmin.tls=true"
+
+  frontend:
+    image: node:17
+    working_dir: /srv
+    volumes:
+      - "../../frontend:/srv"

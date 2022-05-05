@@ -1,0 +1,26 @@
+http:
+  port: 8080
+  listen_host: 0.0.0.0
+  api:
+    enabled: true
+  frontend:
+    enabled: true
+  static:
+    enabled: true
+    path: /var/www/static
+
+openapi:
+    path: /var/www/static/openapi.json
+
+rdb:
+  driver: postgres
+  host: postgres
+  port: 5432
+  username: see-docker-compose-env
+  password: see-docker-compose-env
+  schema: see-docker-compose-env
+  database: see-docker-compose-env
+
+  migrations:
+    username: see-docker-compose-env
+    password: see-docker-compose-env
